@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cryptography Visualization Tool</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            padding: 20px;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+        }
+        
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #2c3e50;
+        }
+        
+        .intro {
+            text-align: center;
+            margin-bottom: 40px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.6;
+        }
+        
+        .categories {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .category {
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+        
+        .category h2 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e9ecef;
+        }
+        
+        .algorithms {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+        
+        .algorithm {
+            background-color: white;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 15px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .algorithm:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            border-color: #3498db;
+        }
+        
+        .algorithm h3 {
+            color: #3498db;
+            margin-bottom: 10px;
+        }
+        
+        .algorithm p {
+            font-size: 14px;
+            color: #6c757d;
+            margin-bottom: 15px;
+            flex-grow: 1;
+        }
+        
+        .algorithm-btn {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+            align-self: flex-start;
+        }
+        
+        .algorithm-btn:hover {
+            background-color: #2980b9;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #e9ecef;
+            color: #6c757d;
+            font-size: 14px;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .categories {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Cryptography Visualization Tool</h1>
+        
+        <div class="intro">
+            <p>Welcome to the Cryptography Visualization Tool! This interactive platform helps you understand various encryption and decryption techniques through step-by-step visualizations. Select a cryptographic method below to get started.</p>
+        </div>
+        
+        <div class="categories">
+            <div class="category">
+                <h2>Substitution Ciphers</h2>
+                <div class="algorithms">
+                    <div class="algorithm">
+                        <h3>Caesar Cipher</h3>
+                        <p>A simple substitution cipher where each letter is shifted by a fixed number of positions.</p>
+                        <button class="algorithm-btn" onclick="window.location.href='caesar.html'">Visualize</button>
+                    </div>
+                    
+                    <!-- <div class="algorithm">
+                        <h3>Playfair Cipher</h3>
+                        <p>Encrypts pairs of letters using a 5×5 matrix based on a keyword.</p>
+                        <button class="algorithm-btn" onclick="window.location.href='playfair.html'">Visualize</button>
+                    </div> -->
+
+                    <div class="algorithm">
+                        <h3>Vigenère Cipher</h3>
+                        <p>Uses a keyword to determine different Caesar shifts for each letter position.</p>
+                        <button class="algorithm-btn" onclick="window.location.href='vigenere.html'">Visualize</button>
+                    </div>
+                    
+                    <div class="algorithm">
+                        <h3>Hill Cipher</h3>
+                        <p>Uses matrix multiplication for encryption and decryption of letter pairs or triplets.</p>
+                        <button class="algorithm-btn" onclick="window.location.href='hill.html'">Visualize</button>
+                    </div>
+                    
+                </div>
+            </div>
+            
+            <div class="category">
+                <h2>Transposition Ciphers</h2>
+                <div class="algorithms">
+                    <div class="algorithm">
+                        <h3>Rail Fence Cipher</h3>
+                        <p>Writes text in a zigzag pattern across multiple "rails" and reads off by rows.</p>
+                        <button class="algorithm-btn" onclick="window.location.href='railfence.html'">Visualize</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="category">
+                <h2>Modern Algorithms</h2>
+                <div class="algorithms">
+                    <div class="algorithm">
+                        <h3>DES (Data Encryption Standard)</h3>
+                        <p>A symmetric-key block cipher that uses a 56-bit key for encryption.</p>
+                        <button class="algorithm-btn" onclick="window.location.href='des.html'">Visualize</button>
+                    </div>
+                    
+                    <div class="algorithm">
+                        <h3>RSA Algorithm</h3>
+                        <p>A public-key cryptosystem widely used for secure data transmission.</p>
+                        <button class="algorithm-btn" onclick="window.location.href='rsa.html'">Visualize</button>
+                    </div>
+                    
+                    <div class="algorithm">
+                        <h3>Diffie-Hellman Key Exchange</h3>
+                        <p>A method for securely exchanging cryptographic keys over a public channel.</p>
+                        <button class="algorithm-btn" onclick="window.location.href='diffie-hellman.html'">Visualize</button>
+                    </div>
+                    
+                    <div class="algorithm">
+                        <h3>SHA-1 (Secure Hash Algorithm)</h3>
+                        <p>A cryptographic hash function that produces a 160-bit hash value.</p>
+                        <button class="algorithm-btn" onclick="window.location.href='sha1.html'">Visualize</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>Built with ❤️ (and a little chaos) by NARAYAN and MANAS!!</p>
+        </div>
+    </div>
+</body>
+</html>
