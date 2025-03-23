@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diffie-Hellman Key Exchange Visualization</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            padding: 20px;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+        }
+        
+        .header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        
+        .back-btn {
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 8px 15px;
+            margin-right: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        .back-btn:hover {
+            background-color: #e9ecef;
+        }
+        
+        .back-btn::before {
+            content: "←";
+            margin-right: 5px;
+        }
+        
+        h1 {
+            flex-grow: 1;
+            text-align: center;
+            color: #2c3e50;
+        }
+        
+        .input-section {
+            margin-bottom: 30px;
+        }
+        
+        .input-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        
+        .hint {
+            font-size: 12px;
+            color: #777;
+            margin-top: 5px;
+        }
+        
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background-color: #2980b9;
+        }
+        
+        .visualization {
+            margin-top: 30px;
+        }
+        
+        .dh-overview {
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+        
+        .dh-overview h2 {
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+        
+        .dh-diagram {
+            max-width: 100%;
+            margin: 20px auto;
+            display: block;
+        }
+        
+        .participants {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .participant {
+            flex: 1;
+            min-width: 250px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: white;
+        }
+        
+        .participant-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #3498db;
+        }
+        
+        .participant-value {
+            font-family: monospace;
+            word-break: break-all;
+            margin-bottom: 10px;
+        }
+        
+        .animation-container {
+            position: relative;
+            height: 400px;
+            margin: 30px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            overflow: hidden;
+            background-color: #f8f9fa;
+        }
+        
+        .animation-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+        
+        .animation-controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .animation-step {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            opacity: 0;
+            transition: opacity 0.5s;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        
+        .animation-step.active {
+            opacity: 1;
+        }
+        
+        .animation-text {
+            font-size: 16px;
+            margin-top: 20px;
+            text-align: center;
+            max-width: 80%;
+        }
+        
+        .formula {
+            font-family: monospace;
+            background-color: #f0f0f0;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            text-align: center;
+        }
+        
+        .result-container {
+            background-color: #f0f9ff;
+            padding: 20px;
+            border-radius: 5px;
+            border-left: 5px solid #3498db;
+        }
+        
+        .result-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+        
+        .result {
+            font-family: monospace;
+            font-size: 18px;
+            word-break: break-all;
+        }
+        
+        .how-it-works {
+            margin-top: 40px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+        
+        .how-it-works h2 {
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+        
+        .how-it-works p {
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+        
+        .how-it-works ol {
+            padding-left: 20px;
+            margin-bottom: 15px;
+        }
+        
+        .how-it-works li {
+            margin-bottom: 10px;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .participants {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <button class="back-btn" onclick="window.location.href='index.html'">Back</button>
+            <h1>Diffie-Hellman Key Exchange Visualization</h1>
+        </div>
+        
+        <div class="input-section">
+            <div class="input-group">
+                <label for="prime">Prime Number (p):</label>
+                <input type="number" id="prime" placeholder="Enter a prime number" value="23">
+                <div class="hint">Enter a prime number (for demonstration purposes, use small primes)</div>
+            </div>
+            
+            <div class="input-group">
+                <label for="generator">Generator (g):</label>
+                <input type="number" id="generator" placeholder="Enter a generator" value="5">
+                <div class="hint">A primitive root modulo p</div>
+            </div>
+            
+            <div class="input-group">
+                <label for="alice-private">Alice's Private Key (a):</label>
+                <input type="number" id="alice-private" placeholder="Enter Alice's private key" value="6">
+                <div class="hint">A number between 1 and p-1</div>
+            </div>
+            
+            <div class="input-group">
+                <label for="bob-private">Bob's Private Key (b):</label>
+                <input type="number" id="bob-private" placeholder="Enter Bob's private key" value="15">
+                <div class="hint">A number between 1 and p-1</div>
+            </div>
+            
+            <button id="process-btn">Process Key Exchange</button>
+        </div>
+        
+        <div class="visualization">
+            <div class="dh-overview">
+                <h2>Diffie-Hellman Key Exchange Overview</h2>
+                <img src="/placeholder.svg?height=300&width=600" alt="Diffie-Hellman Exchange Diagram" class="dh-diagram">
+                <p>The Diffie-Hellman key exchange is a method for securely exchanging cryptographic keys over a public channel without requiring a pre-shared secret.</p>
+                
+                <div class="participants">
+                    <div class="participant">
+                        <div class="participant-title">Alice</div>
+                        <div class="participant-value">Private Key (a): <span id="alice-private-display"></span></div>
+                        <div class="participant-value">Public Value (A): <span id="alice-public"></span></div>
+                        <div class="participant-value">Shared Secret: <span id="alice-secret"></span></div>
+                    </div>
+                    <div class="participant">
+                        <div class="participant-title">Bob</div>
+                        <div class="participant-value">Private Key (b): <span id="bob-private-display"></span></div>
+                        <div class="participant-value">Public Value (B): <span id="bob-public"></span></div>
+                        <div class="participant-value">Shared Secret: <span id="bob-secret"></span></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="animation-container" id="animation-container">
+                <div class="animation-title">Key Exchange Process:</div>
+                <!-- <div class="animation-controls">
+                    <button id="prev-step">Previous Step</button>
+                    <button id="next-step">Next Step</button>
+                </div> -->
+                <div id="animation-steps"></div>
+            </div>
+            
+            <div class="result-container">
+                <div class="result-title">Shared Secret Key:</div>
+                <div class="result" id="result"></div>
+            </div>
+        </div>
+        
+        <div class="how-it-works">
+            <h2>How Diffie-Hellman Key Exchange Works:</h2>
+            <p>The Diffie-Hellman key exchange allows two parties to jointly establish a shared secret key over an insecure communications channel without ever having to transmit the key itself.</p>
+            
+            <ol>
+                <li><strong>Public Parameters:</strong>
+                    <ul>
+                        <li>A large prime number p</li>
+                        <li>A generator g (a primitive root modulo p)</li>
+                    </ul>
+                </li>
+                <li><strong>Private Keys:</strong>
+                    <ul>
+                        <li>Alice chooses a private key a (a number between 1 and p-1)</li>
+                        <li>Bob chooses a private key b (a number between 1 and p-1)</li>
+                    </ul>
+                </li>
+                <li><strong>Public Values:</strong>
+                    <ul>
+                        <li>Alice computes A = g<sup>a</sup> mod p and sends A to Bob</li>
+                        <li>Bob computes B = g<sup>b</sup> mod p and sends B to Alice</li>
+                    </ul>
+                </li>
+                <li><strong>Shared Secret:</strong>
+                    <ul>
+                        <li>Alice computes the shared secret: s = B<sup>a</sup> mod p = (g<sup>b</sup>)<sup>a</sup> mod p = g<sup>ab</sup> mod p</li>
+                        <li>Bob computes the shared secret: s = A<sup>b</sup> mod p = (g<sup>a</sup>)<sup>b</sup> mod p = g<sup>ab</sup> mod p</li>
+                    </ul>
+                </li>
+            </ol>
+            
+            <p>The security of the Diffie-Hellman key exchange relies on the difficulty of the discrete logarithm problem. Even if an eavesdropper knows p, g, A, and B, it is computationally difficult to determine the shared secret g<sup>ab</sup> mod p without knowing either a or b.</p>
+            
+            <p>In practice, much larger values are used for p (typically 2048 bits or more), but for this demonstration, we use small numbers to make the calculations easier to follow.</p>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const primeInput = document.getElementById('prime');
+        const generatorInput = document.getElementById('generator');
+        const alicePrivateInput = document.getElementById('alice-private');
+        const bobPrivateInput = document.getElementById('bob-private');
+        const processBtn = document.getElementById('process-btn');
+        const alicePrivateDisplay = document.getElementById('alice-private-display');
+        const alicePublicEl = document.getElementById('alice-public');
+        const aliceSecretEl = document.getElementById('alice-secret');
+        const bobPrivateDisplay = document.getElementById('bob-private-display');
+        const bobPublicEl = document.getElementById('bob-public');
+        const bobSecretEl = document.getElementById('bob-secret');
+        const animationStepsEl = document.getElementById('animation-steps');
+        const resultEl = document.getElementById('result');
+        const prevStepBtn = document.getElementById('prev-step');
+        const nextStepBtn = document.getElementById('next-step');
+        
+        // State
+        let currentAnimationStep = 0;
+        let totalAnimationSteps = 0;
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            processDiffieHellman();
+        });
+        
+        // Event Listeners
+        processBtn.addEventListener('click', processDiffieHellman);
+        
+        prevStepBtn.addEventListener('click', () => {
+            if (currentAnimationStep > 0) {
+                showAnimationStep(--currentAnimationStep);
+            }
+        });
+        
+        nextStepBtn.addEventListener('click', () => {
+            if (currentAnimationStep < totalAnimationSteps - 1) {
+                showAnimationStep(++currentAnimationStep);
+            }
+        });
+        
+        // Diffie-Hellman Functions
+        function processDiffieHellman() {
+            const p = parseInt(primeInput.value);
+            const g = parseInt(generatorInput.value);
+            const a = parseInt(alicePrivateInput.value);
+            const b = parseInt(bobPrivateInput.value);
+            
+            if (!isPrime(p)) {
+                alert("p must be a prime number");
+                return;
+            }
+            
+            if (g <= 1 || g >= p) {
+                alert(`g must be between 1 and ${p-1}`);
+                return;
+            }
+            
+            if (a <= 0 || a >= p) {
+                alert(`Alice's private key must be between 1 and ${p-1}`);
+                return;
+            }
+            
+            if (b <= 0 || b >= p) {
+                alert(`Bob's private key must be between 1 and ${p-1}`);
+                return;
+            }
+            
+            // Compute public values
+            const A = modPow(g, a, p);
+            const B = modPow(g, b, p);
+            
+            // Compute shared secrets
+            const aliceSecret = modPow(B, a, p);
+            const bobSecret = modPow(A, b, p);
+            
+            // Display values
+            alicePrivateDisplay.textContent = a;
+            alicePublicEl.textContent = A;
+            aliceSecretEl.textContent = aliceSecret;
+            
+            bobPrivateDisplay.textContent = b;
+            bobPublicEl.textContent = B;
+            bobSecretEl.textContent = bobSecret;
+            
+            // Display result
+            resultEl.textContent = aliceSecret;
+            
+            // Create animation steps
+            const steps = [];
+            
+            steps.push({
+                type: 'parameters',
+                description: 'Public Parameters',
+                content: `
+                    <p>The public parameters for the Diffie-Hellman key exchange are:</p>
+                    <div class="formula">Prime number (p) = ${p}</div>
+                    <div class="formula">Generator (g) = ${g}</div>
+                    <p>These values are known to both Alice and Bob, and can be transmitted over an insecure channel.</p>
+                `
+            });
+            
+            steps.push({
+                type: 'private-keys',
+                description: 'Private Keys',
+                content: `
+                    <p>Alice and Bob each choose a private key that they keep secret:</p>
+                    <div class="formula">Alice's private key (a) = ${a}</div>
+                    <div class="formula">Bob's private key (b) = ${b}</div>
+                    <p>These values are never shared with anyone.</p>
+                `
+            });
+            
+            steps.push({
+                type: 'public-values',
+                description: 'Public Values',
+                content: `
+                    <p>Alice and Bob compute their public values:</p>
+                    <div class="formula">Alice computes: A = g<sup>a</sup> mod p = ${g}<sup>${a}</sup> mod ${p} = ${A}</div>
+                    <div class="formula">Bob computes: B = g<sup>b</sup> mod p = ${g}<sup>${b}</sup> mod ${p} = ${B}</div>
+                    <p>These values are sent to each other over the public channel.</p>
+                `
+            });
+            
+            steps.push({
+                type: 'alice-secret',
+                description: 'Alice Computes Shared Secret',
+                content: `
+                    <p>Alice receives Bob's public value B = ${B}</p>
+                    <p>Alice computes the shared secret using her private key:</p>
+                    <div class="formula">s = B<sup>a</sup> mod p = ${B}<sup>${a}</sup> mod ${p} = ${aliceSecret}</div>
+                `
+            });
+            
+            steps.push({
+                type: 'bob-secret',
+                description: 'Bob Computes Shared Secret',
+                content: `
+                    <p>Bob receives Alice's public value A = ${A}</p>
+                    <p>Bob computes the shared secret using his private key:</p>
+                    <div class="formula">s = A<sup>b</sup> mod p = ${A}<sup>${b}</sup> mod ${p} = ${bobSecret}</div>
+                `
+            });
+            
+            steps.push({
+                type: 'verification',
+                description: 'Verification',
+                content: `
+                    <p>Both Alice and Bob have computed the same shared secret:</p>
+                    <div class="formula">Alice's secret: ${aliceSecret}</div>
+                    <div class="formula">Bob's secret: ${bobSecret}</div>
+                    <p>This works because:</p>
+                    <div class="formula">B<sup>a</sup> = (g<sup>b</sup>)<sup>a</sup> = g<sup>ab</sup> = (g<sup>a</sup>)<sup>b</sup> = A<sup>b</sup></div>
+                    <p>This shared secret can now be used as a key for symmetric encryption.</p>
+                `
+            });
+            
+            createAnimation(steps);
+            
+            // Reset animation
+            currentAnimationStep = 0;
+            totalAnimationSteps = steps.length;
+            showAnimationStep(currentAnimationStep);
+        }
+        
+        // Helper Functions
+        function isPrime(num) {
+            if (num <= 1) return false;
+            if (num <= 3) return true;
+            if (num % 2 === 0 || num % 3 === 0) return false;
+            
+            for (let i = 5; i * i <= num; i += 6) {
+                if (num % i === 0 || num % (i + 2) === 0) return false;
+            }
+            
+            return true;
+        }
+        
+        function modPow(base, exponent, modulus) {
+            // Compute (base^exponent) % modulus efficiently
+            if (modulus === 1) return 0;
+            
+            let result = 1;
+            base = base % modulus;
+            
+            while (exponent > 0) {
+                if (exponent % 2 === 1) {
+                    result = (result * base) % modulus;
+                }
+                exponent = Math.floor(exponent / 2);
+                base = (base * base) % modulus;
+            }
+            
+            return result;
+        }
+        
+        // Display Functions
+        function createAnimation(steps) {
+            animationStepsEl.innerHTML = '';
+            
+            steps.forEach((step, index) => {
+                const stepEl = document.createElement('div');
+                stepEl.className = 'animation-step';
+                
+                const title = document.createElement('div');
+                title.style.fontWeight = 'bold';
+                title.style.marginBottom = '20px';
+                title.style.fontSize = '18px';
+                title.textContent = step.description;
+                
+                const content = document.createElement('div');
+                content.innerHTML = step.content;
+                
+                stepEl.appendChild(title);
+                stepEl.appendChild(content);
+                
+                animationStepsEl.appendChild(stepEl);
+            });
+        }
+        
+        function showAnimationStep(step) {
+            const steps = document.querySelectorAll('.animation-step');
+            
+            steps.forEach((s, i) => {
+                if (i === step) {
+                    s.classList.add('active');
+                } else {
+                    s.classList.remove('active');
+                }
+            });
+            
+            // Update button states
+            prevStepBtn.disabled = step === 0;
+            nextStepBtn.disabled = step === totalAnimationSteps - 1;
+        }
+    </script>
+</body>
+</html>

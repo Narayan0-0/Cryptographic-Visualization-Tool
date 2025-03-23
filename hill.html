@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hill Cipher Visualization</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            padding: 20px;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+        }
+        
+        .header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        
+        .back-btn {
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 8px 15px;
+            margin-right: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        .back-btn:hover {
+            background-color: #e9ecef;
+        }
+        
+        .back-btn::before {
+            content: "←";
+            margin-right: 5px;
+        }
+        
+        h1 {
+            flex-grow: 1;
+            text-align: center;
+            color: #2c3e50;
+        }
+        
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+            border-bottom: none;
+            border-radius: 5px 5px 0 0;
+            margin-right: 5px;
+        }
+        
+        .tab.active {
+            background-color: #fff;
+            border-bottom: 1px solid white;
+            margin-bottom: -1px;
+            font-weight: bold;
+        }
+        
+        .input-section {
+            margin-bottom: 30px;
+        }
+        
+        .input-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        
+        .matrix-input {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .matrix-cell {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            text-align: center;
+        }
+        
+        .hint {
+            font-size: 12px;
+            color: #777;
+            margin-top: 5px;
+        }
+        
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background-color: #2980b9;
+        }
+        
+        .visualization {
+            margin-top: 30px;
+        }
+        
+        .matrix-container {
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        .matrix-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 18px;
+            text-align: center;
+            width: 100%;
+        }
+        
+        .matrix {
+            border-collapse: collapse;
+            margin: 0 auto;
+        }
+        
+        .matrix td {
+            border: 1px solid #ddd;
+            padding: 15px;
+            text-align: center;
+            min-width: 50px;
+            height: 50px;
+            font-family: monospace;
+            font-size: 18px;
+        }
+        
+        .matrix-operator {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 0 10px;
+        }
+        
+        .animation-container {
+            position: relative;
+            height: 300px;
+            margin: 30px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            overflow: hidden;
+            background-color: #f8f9fa;
+        }
+        
+        .animation-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+        
+        .animation-controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .animation-step {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.5s;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        
+        .animation-step.active {
+            opacity: 1;
+        }
+        
+        .animation-text {
+            font-size: 16px;
+            margin-top: 20px;
+            text-align: center;
+            max-width: 80%;
+        }
+        
+        .animation-formula {
+            font-family: monospace;
+            background-color: #f0f0f0;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 15px;
+            text-align: center;
+        }
+        
+        .result-container {
+            background-color: #f0f9ff;
+            padding: 20px;
+            border-radius: 5px;
+            border-left: 5px solid #3498db;
+        }
+        
+        .result-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+        
+        .result {
+            font-family: monospace;
+            font-size: 24px;
+            letter-spacing: 2px;
+            word-break: break-all;
+        }
+        
+        .how-it-works {
+            margin-top: 40px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+        
+        .how-it-works h2 {
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+        
+        .how-it-works p {
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+        
+        .how-it-works ol {
+            padding-left: 20px;
+            margin-bottom: 15px;
+        }
+        
+        .how-it-works li {
+            margin-bottom: 10px;
+        }
+        
+        .formula {
+            background-color: #e9ecef;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            margin: 10px 0;
+            text-align: center;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .matrix-container {
+                flex-direction: column;
+            }
+            
+            .matrix-operator {
+                transform: rotate(90deg);
+                margin: 10px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <button class="back-btn" onclick="window.location.href='index.html'">Back</button>
+            <h1>Hill Cipher Visualization</h1>
+        </div>
+        
+        <div class="tabs">
+            <div class="tab active" data-tab="encrypt">Encrypt</div>
+            <div class="tab" data-tab="decrypt">Decrypt</div>
+        </div>
+        
+        <div class="input-section">
+            <div class="input-group">
+                <label for="input-text">
+                    <span id="input-label">Plaintext</span>:
+                </label>
+                <input type="text" id="input-text" placeholder="Enter text to encrypt" value="HELLO">
+                <div class="hint">Only letters A-Z are allowed (automatically converted to uppercase). Length must be even for 2x2 matrix.</div>
+            </div>
+            
+            <div class="input-group">
+                <label for="key-matrix">Key Matrix (2x2):</label>
+                <div class="matrix-input" id="key-matrix-input">
+                    <input type="number" class="matrix-cell" data-row="0" data-col="0" value="5">
+                    <input type="number" class="matrix-cell" data-row="0" data-col="1" value="8">
+                    <input type="number" class="matrix-cell" data-row="1" data-col="0" value="17">
+                    <input type="number" class="matrix-cell" data-row="1" data-col="1" value="3">
+                </div>
+                <div class="hint">Enter integers between 0-25 (A=0, B=1, ..., Z=25). Matrix must be invertible mod 26.</div>
+            </div>
+            
+            <button id="process-btn">Process</button>
+        </div>
+        
+        <div class="visualization">
+            <div class="matrix-container">
+                <div class="matrix-title">Key Matrix:</div>
+                <table class="matrix" id="key-matrix-display"></table>
+            </div>
+            
+            <div class="animation-container" id="animation-container">
+                <div class="animation-title">Visual Process:</div>
+                <!-- <div class="animation-controls">
+                    <button id="prev-step">Previous Step</button>
+                    <button id="next-step">Next Step</button>
+                </div> -->
+                <div id="animation-steps"></div>
+            </div>
+            
+            <div class="result-container">
+                <div class="result-title">
+                    <span id="result-label">Encrypted</span> Result:
+                </div>
+                <div class="result" id="result"></div>
+            </div>
+        </div>
+        
+        <div class="how-it-works">
+            <h2>How Hill Cipher Works:</h2>
+            <p>The Hill cipher is a polygraphic substitution cipher based on linear algebra. It was invented by Lester S. Hill in 1929.</p>
+            
+            <ol>
+                <li><strong>Choose a key matrix</strong> - This matrix must be invertible in modulo 26 arithmetic.</li>
+                <li><strong>Convert plaintext to numbers</strong> - Each letter is assigned a value (A=0, B=1, ..., Z=25).</li>
+                <li><strong>Group the plaintext</strong> - For a 2x2 matrix, group the plaintext into pairs.</li>
+                <li><strong>Matrix multiplication</strong> - Multiply each plaintext vector by the key matrix.</li>
+                <li><strong>Modulo operation</strong> - Take modulo 26 of each resulting value.</li>
+                <li><strong>Convert back to letters</strong> - Convert the numbers back to letters.</li>
+            </ol>
+            
+            <p>The mathematical formula for encryption is:</p>
+            <div class="formula">C = KP (mod 26)</div>
+            
+            <p>And for decryption:</p>
+            <div class="formula">P = K<sup>-1</sup>C (mod 26)</div>
+            
+            <p>Where:</p>
+            <ul>
+                <li>P is the plaintext vector</li>
+                <li>C is the ciphertext vector</li>
+                <li>K is the key matrix</li>
+                <li>K<sup>-1</sup> is the inverse of the key matrix in modulo 26</li>
+            </ul>
+            
+            <p>The Hill cipher is strong against frequency analysis attacks because it encrypts multiple letters at once, obscuring single-letter frequencies. However, it is vulnerable to known-plaintext attacks.</p>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const inputText = document.getElementById('input-text');
+        const processBtn = document.getElementById('process-btn');
+        const keyMatrixDisplay = document.getElementById('key-matrix-display');
+        const keyMatrixInputs = document.querySelectorAll('.matrix-cell');
+        const animationStepsEl = document.getElementById('animation-steps');
+        const resultEl = document.getElementById('result');
+        const tabs = document.querySelectorAll('.tab');
+        const inputLabel = document.getElementById('input-label');
+        const resultLabel = document.getElementById('result-label');
+        const prevStepBtn = document.getElementById('prev-step');
+        const nextStepBtn = document.getElementById('next-step');
+        
+        // State
+        let mode = 'encrypt';
+        let currentAnimationStep = 0;
+        let totalAnimationSteps = 0;
+        let keyMatrix = [[5, 8], [17, 3]];
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            updateKeyMatrixDisplay();
+            processHill();
+        });
+        
+        // Event Listeners
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                tabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                mode = tab.dataset.tab;
+                
+                if (mode === 'encrypt') {
+                    inputLabel.textContent = 'Plaintext';
+                    resultLabel.textContent = 'Encrypted';
+                    inputText.placeholder = 'Enter text to encrypt';
+                } else {
+                    inputLabel.textContent = 'Ciphertext';
+                    resultLabel.textContent = 'Decrypted';
+                    inputText.placeholder = 'Enter text to decrypt';
+                }
+                
+                processHill();
+            });
+        });
+        
+        processBtn.addEventListener('click', processHill);
+        
+        inputText.addEventListener('input', e => {
+            e.target.value = e.target.value.toUpperCase().replace(/[^A-Z]/g, '');
+        });
+        
+        keyMatrixInputs.forEach(input => {
+            input.addEventListener('input', e => {
+                let value = parseInt(e.target.value);
+                if (isNaN(value) || value < 0) {
+                    e.target.value = 0;
+                } else if (value > 25) {
+                    e.target.value = 25;
+                }
+                
+                const row = parseInt(e.target.dataset.row);
+                const col = parseInt(e.target.dataset.col);
+                keyMatrix[row][col] = parseInt(e.target.value);
+                
+                updateKeyMatrixDisplay();
+            });
+        });
+        
+        prevStepBtn.addEventListener('click', () => {
+            if (currentAnimationStep > 0) {
+                showAnimationStep(--currentAnimationStep);
+            }
+        });
+        
+        nextStepBtn.addEventListener('click', () => {
+            if (currentAnimationStep < totalAnimationSteps - 1) {
+                showAnimationStep(++currentAnimationStep);
+            }
+        });
+        
+        // Hill Cipher Functions
+        function processHill() {
+            const text = inputText.value.toUpperCase().replace(/[^A-Z]/g, '');
+            
+            if (!text) return;
+            
+            // Ensure text length is even for 2x2 matrix
+            let processedText = text;
+            if (processedText.length % 2 !== 0) {
+                processedText += 'X';
+            }
+            
+            // Update key matrix from inputs
+            keyMatrixInputs.forEach(input => {
+                const row = parseInt(input.dataset.row);
+                const col = parseInt(input.dataset.col);
+                keyMatrix[row][col] = parseInt(input.value) || 0;
+            });
+            
+            updateKeyMatrixDisplay();
+            
+            // Check if matrix is invertible
+            if (!isInvertibleMod26(keyMatrix)) {
+                alert("The key matrix is not invertible in modulo 26. Please choose different values.");
+                return;
+            }
+            
+            let result = '';
+            const steps = [];
+            
+            // Add initial step
+            steps.push({
+                type: 'prepare',
+                text: processedText,
+                description: `Preparing ${mode === 'encrypt' ? 'plaintext' : 'ciphertext'} for processing`
+            });
+            
+            // Process text in pairs
+            for (let i = 0; i < processedText.length; i += 2) {
+                const pair = processedText.substring(i, i + 2);
+                const pairVector = [
+                    pair.charCodeAt(0) - 65, // A=0, B=1, ..., Z=25
+                    pair.charCodeAt(1) - 65
+                ];
+                
+                let resultVector;
+                if (mode === 'encrypt') {
+                    resultVector = multiplyMatrixVector(keyMatrix, pairVector);
+                } else {
+                    const inverseMatrix = invertMatrix(keyMatrix);
+                    resultVector = multiplyMatrixVector(inverseMatrix, pairVector);
+                }
+                
+                // Convert back to letters
+                const resultPair = 
+                    String.fromCharCode(resultVector[0] + 65) + 
+                    String.fromCharCode(resultVector[1] + 65);
+                
+                result += resultPair;
+                
+                steps.push({
+                    type: 'process-pair',
+                    pair,
+                    pairVector,
+                    resultVector,
+                    resultPair,
+                    description: `Processing pair: ${pair}`
+                });
+            }
+            
+            // Add final step
+            steps.push({
+                type: 'complete',
+                result,
+                description: `${mode === 'encrypt' ? 'Encryption' : 'Decryption'} complete`
+            });
+            
+            displayResult(result);
+            createAnimation(steps);
+            
+            // Reset animation
+            currentAnimationStep = 0;
+            totalAnimationSteps = steps.length;
+            showAnimationStep(currentAnimationStep);
+        }
+        
+        function multiplyMatrixVector(matrix, vector) {
+            const result = [
+                (matrix[0][0] * vector[0] + matrix[0][1] * vector[1]) % 26,
+                (matrix[1][0] * vector[0] + matrix[1][1] * vector[1]) % 26
+            ];
+            
+            // Ensure positive values
+            return result.map(val => (val + 26) % 26);
+        }
+        
+        function determinant(matrix) {
+            return (matrix[0][0] * matrix[1][1] - matrix[0][1] * matrix[1][0]);
+        }
+        
+        function modInverse(a, m) {
+            // Find modular multiplicative inverse of a under modulo m
+            a = ((a % m) + m) % m; // Ensure positive value
+            for (let x = 1; x < m; x++) {
+                if ((a * x) % m === 1) {
+                    return x;
+                }
+            }
+            return 1; // Default, should not reach here if matrix is invertible
+        }
+        
+        function isInvertibleMod26(matrix) {
+            const det = determinant(matrix) % 26;
+            // Matrix is invertible if gcd(det, 26) = 1
+            return gcd(((det % 26) + 26) % 26, 26) === 1;
+        }
+        
+        function gcd(a, b) {
+            if (b === 0) return a;
+            return gcd(b, a % b);
+        }
+        
+        function invertMatrix(matrix) {
+            const det = determinant(matrix) % 26;
+            const detInv = modInverse(((det % 26) + 26) % 26, 26);
+            
+            const adjugate = [
+                [matrix[1][1], -matrix[0][1]],
+                [-matrix[1][0], matrix[0][0]]
+            ];
+            
+            // Calculate inverse elements and ensure positive values
+            return [
+                [(adjugate[0][0] * detInv) % 26, (adjugate[0][1] * detInv) % 26].map(val => (val + 26) % 26),
+                [(adjugate[1][0] * detInv) % 26, (adjugate[1][1] * detInv) % 26].map(val => (val + 26) % 26)
+            ];
+        }
+        
+        // Display Functions
+        function updateKeyMatrixDisplay() {
+            keyMatrixDisplay.innerHTML = '';
+            
+            for (let i = 0; i < 2; i++) {
+                const row = document.createElement('tr');
+                for (let j = 0; j < 2; j++) {
+                    const cell = document.createElement('td');
+                    cell.textContent = keyMatrix[i][j];
+                    row.appendChild(cell);
+                }
+                keyMatrixDisplay.appendChild(row);
+            }
+        }
+        
+        function displayResult(output) {
+            resultEl.textContent = output;
+        }
+        
+        function createAnimation(steps) {
+            animationStepsEl.innerHTML = '';
+            
+            steps.forEach((step, index) => {
+                const stepEl = document.createElement('div');
+                stepEl.className = 'animation-step';
+                
+                if (step.type === 'prepare') {
+                    // Preparation step
+                    const title = document.createElement('div');
+                    title.style.fontWeight = 'bold';
+                    title.style.marginBottom = '20px';
+                    title.textContent = 'Step 1: Preparation';
+                    
+                    const text = document.createElement('div');
+                    text.className = 'animation-text';
+                    text.innerHTML = `
+                        <p>Original text: "${step.text}"</p>
+                        <p>We'll process this text in pairs of letters.</p>
+                    `;
+                    
+                    stepEl.appendChild(title);
+                    stepEl.appendChild(text);
+                    
+                } else if (step.type === 'process-pair') {
+                    // Processing pair step
+                    const title = document.createElement('div');
+                    title.style.fontWeight = 'bold';
+                    title.style.marginBottom = '20px';
+                    title.textContent = `Step ${index + 1}: Processing Pair "${step.pair}"`;
+                    
+                    const text = document.createElement('div');
+                    text.className = 'animation-text';
+                    text.innerHTML = `
+                        <p>Converting "${step.pair}" to numbers: [${step.pairVector.join(', ')}]</p>
+                        <p>${mode === 'encrypt' ? 'Multiplying by key matrix' : 'Multiplying by inverse key matrix'}</p>
+                    `;
+                    
+                    const formula = document.createElement('div');
+                    formula.className = 'animation-formula';
+                    formula.innerHTML = `
+                        [${keyMatrix[0].join(' ')}] × [${step.pairVector[0]}] = [${step.resultVector[0]}]<br>
+                        [${keyMatrix[1].join(' ')}] × [${step.pairVector[1]}] = [${step.resultVector[1]}]
+                    `;
+                    
+                    const result = document.createElement('div');
+                    result.className = 'animation-text';
+                    result.innerHTML = `
+                        <p>Converting result [${step.resultVector.join(', ')}] back to letters: "${step.resultPair}"</p>
+                    `;
+                    
+                    stepEl.appendChild(title);
+                    stepEl.appendChild(text);
+                    stepEl.appendChild(formula);
+                    stepEl.appendChild(result);
+                    
+                } else if (step.type === 'complete') {
+                    // Completion step
+                    const title = document.createElement('div');
+                    title.style.fontWeight = 'bold';
+                    title.style.marginBottom = '20px';
+                    title.textContent = `Final Step: ${mode === 'encrypt' ? 'Encryption' : 'Decryption'} Complete`;
+                    
+                    const text = document.createElement('div');
+                    text.className = 'animation-text';
+                    text.innerHTML = `
+                        <p>The ${mode === 'encrypt' ? 'encrypted' : 'decrypted'} result is: "${step.result}"</p>
+                    `;
+                    
+                    stepEl.appendChild(title);
+                    stepEl.appendChild(text);
+                }
+                
+                animationStepsEl.appendChild(stepEl);
+            });
+        }
+        
+        function showAnimationStep(step) {
+            const steps = document.querySelectorAll('.animation-step');
+            
+            steps.forEach((s, i) => {
+                if (i === step) {
+                    s.classList.add('active');
+                } else {
+                    s.classList.remove('active');
+                }
+            });
+            
+            // Update button states
+            prevStepBtn.disabled = step === 0;
+            nextStepBtn.disabled = step === totalAnimationSteps - 1;
+        }
+    </script>
+</body>
+</html>

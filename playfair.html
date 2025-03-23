@@ -1,0 +1,1674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Playfair Cipher Visualizer</title>
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-light: #818cf8;
+            --primary-dark: #3730a3;
+            --secondary: #64748b;
+            --background: #f8fafc;
+            --foreground: #0f172a;
+            --card: #ffffff;
+            --card-foreground: #1e293b;
+            --border: #e2e8f0;
+            --muted: #f1f5f9;
+            --muted-foreground: #64748b;
+            --accent: #f1f5f9;
+            --accent-foreground: #0f172a;
+            --destructive: #ef4444;
+            --destructive-foreground: #f8fafc;
+            --success: #22c55e;
+            --success-foreground: #f8fafc;
+            --radius: 0.5rem;
+            --font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-sans);
+            background-color: var(--background);
+            color: var(--foreground);
+            line-height: 1.5;
+            padding: 1rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+
+        h1, h2, h3 {
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        h1 {
+            font-size: 1.875rem;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        h3 {
+            font-size: 1.25rem;
+            margin-top: 1rem;
+        }
+
+        .card {
+            background-color: var(--card);
+            border-radius: var(--radius);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .card-header {
+            margin-bottom: 1rem;
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .card-description {
+            color: var(--muted-foreground);
+            font-size: 0.875rem;
+        }
+
+        .grid {
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        @media (min-width: 768px) {
+            .grid-cols-2 {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 0.5rem;
+            font-size: 1rem;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            background-color: var(--background);
+            color: var(--foreground);
+            font-family: var(--font-sans);
+        }
+
+        input:focus, textarea:focus {
+            outline: 2px solid var(--primary-light);
+            outline-offset: 2px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: var(--radius);
+            font-size: 0.875rem;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+            border: 1px solid transparent;
+        }
+
+        .back-btn {
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 8px 15px;
+            margin-right: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        .back-btn:hover {
+            background-color: #e9ecef;
+        }
+        
+        .back-btn::before {
+            content: "←";
+            margin-right: 5px;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border-color: var(--border);
+            color: var(--foreground);
+        }
+
+        .btn-outline:hover {
+            background-color: var(--muted);
+        }
+
+        .btn-destructive {
+            background-color: var(--destructive);
+            color: var(--destructive-foreground);
+        }
+
+        .btn-destructive:hover {
+            background-color: #b91c1c;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .flex {
+            display: flex;
+        }
+
+        .flex-col {
+            flex-direction: column;
+        }
+
+        .items-center {
+            align-items: center;
+        }
+
+        .justify-between {
+            justify-content: space-between;
+        }
+
+        .justify-center {
+            justify-content: center;
+        }
+
+        .gap-2 {
+            gap: 0.5rem;
+        }
+
+        .gap-4 {
+            gap: 1rem;
+        }
+
+        .mt-4 {
+            margin-top: 1rem;
+        }
+
+        .mb-4 {
+            margin-bottom: 1rem;
+        }
+
+        .font-mono {
+            font-family: var(--font-mono);
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .text-sm {
+            font-size: 0.875rem;
+        }
+
+        .text-xs {
+            font-size: 0.75rem;
+        }
+
+        .text-muted {
+            color: var(--muted-foreground);
+        }
+
+        .bg-muted {
+            background-color: var(--muted);
+        }
+
+        .p-2 {
+            padding: 0.5rem;
+        }
+
+        .p-4 {
+            padding: 1rem;
+        }
+
+        .rounded {
+            border-radius: var(--radius);
+        }
+
+        .border {
+            border: 1px solid var(--border);
+        }
+
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 1rem;
+        }
+
+        .tab {
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+        }
+
+        .tab.active {
+            border-bottom-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Playfair Matrix Styles */
+        .playfair-matrix {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 0.25rem;
+            margin: 1rem 0;
+            max-width: 300px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .matrix-cell {
+            width: 100%;
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--muted);
+            border-radius: var(--radius);
+            font-weight: 600;
+            font-size: 1.25rem;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .matrix-cell.highlight {
+            background-color: var(--primary-light);
+            color: white;
+            transform: scale(1.1);
+            z-index: 1;
+        }
+
+        .matrix-cell.highlight-secondary {
+            background-color: var(--secondary);
+            color: white;
+        }
+
+        /* Process Visualization */
+        .process-flow {
+            position: relative;
+            padding: 2rem 0;
+            margin: 2rem 0;
+        }
+
+        .process-line {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background-color: var(--muted);
+            transform: translateY(-50%);
+        }
+
+        .process-progress {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            height: 2px;
+            background-color: var(--primary);
+            transform: translateY(-50%);
+            transition: width 0.3s ease;
+        }
+
+        .process-steps {
+            display: flex;
+            justify-content: space-between;
+            position: relative;
+        }
+
+        .process-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 1;
+        }
+
+        .step-icon {
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 50%;
+            background-color: var(--muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 0.5rem;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+
+        .process-step.active .step-icon {
+            background-color: var(--primary);
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .step-label {
+            font-size: 0.75rem;
+            text-align: center;
+            max-width: 80px;
+        }
+
+        /* Visualization Area */
+        .visualization-area {
+            min-height: 300px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1rem;
+            margin: 1rem 0;
+            position: relative;
+        }
+
+        .visualization-empty {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            min-height: 200px;
+            color: var(--muted-foreground);
+        }
+
+        .digraph-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin: 1rem 0;
+            justify-content: center;
+        }
+
+        .digraph-box {
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 150px;
+            transition: all 0.3s ease;
+        }
+
+        .digraph-box.active {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px var(--primary-light);
+        }
+
+        .digraph-title {
+            font-size: 0.875rem;
+            color: var(--muted-foreground);
+            margin-bottom: 0.5rem;
+        }
+
+        .digraph-letters {
+            font-size: 1.5rem;
+            font-weight: 600;
+            font-family: var(--font-mono);
+            margin-bottom: 0.5rem;
+        }
+
+        .digraph-rule {
+            font-size: 0.75rem;
+            text-align: center;
+            color: var(--muted-foreground);
+        }
+
+        .digraph-arrow {
+            margin: 0.5rem 0;
+            font-size: 1.5rem;
+            color: var(--primary);
+        }
+
+        /* Animation controls */
+        .animation-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 1rem;
+        }
+
+        .speed-control {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .slider {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 5px;
+            border-radius: 5px;
+            background: var(--muted);
+            outline: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            background: var(--primary);
+            cursor: pointer;
+        }
+
+        .slider::-moz-range-thumb {
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            background: var(--primary);
+            cursor: pointer;
+        }
+
+        /* Explanation box */
+        .explanation-box {
+            background-color: var(--muted);
+            border-radius: var(--radius);
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+
+        .explanation-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Animation */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .pulse {
+            animation: pulse 1.5s infinite;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .process-steps {
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 1rem;
+            }
+
+            .process-line, .process-progress {
+                display: none;
+            }
+
+            .animation-controls {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .btn-group {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        
+
+        <div class="header">
+            <button class="back-btn" onclick="window.location.href='index.html'">Back</button>
+            <h1>Playfair Cipher Visualizer</h1>
+        </div>
+
+        <div class="grid grid-cols-2">
+            <!-- Input Section -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Input</h2>
+                    <p class="card-description">Enter your plaintext and encryption key</p>
+                </div>
+                <div class="form-group">
+                    <label for="plaintext">Plaintext</label>
+                    <input type="text" id="plaintext" placeholder="Enter text to encrypt" value="HELLO">
+                </div>
+                <div class="form-group">
+                    <label for="key">Encryption Key</label>
+                    <input type="text" id="key" placeholder="Enter encryption key" value="MONARCHY">
+                </div>
+                <div class="form-group">
+                    <button id="encrypt-btn" class="btn btn-primary">Encrypt</button>
+                    <button id="decrypt-btn" class="btn btn-outline">Decrypt</button>
+                </div>
+            </div>
+
+            <!-- Output Section -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Output</h2>
+                    <p class="card-description">Encrypted and decrypted results</p>
+                </div>
+                <div class="form-group">
+                    <label for="ciphertext">Ciphertext</label>
+                    <input type="text" id="ciphertext" readonly class="font-mono">
+                </div>
+                <div class="form-group">
+                    <label for="decrypted">Decrypted Text</label>
+                    <input type="text" id="decrypted" readonly class="font-mono">
+                </div>
+            </div>
+        </div>
+
+        <!-- Playfair Matrix -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Playfair Matrix</h2>
+                <p class="card-description">5x5 grid created from your key</p>
+            </div>
+            <div id="playfair-matrix" class="playfair-matrix"></div>
+            <p class="text-center text-sm text-muted mt-4">Note: I and J are combined in the same cell</p>
+        </div>
+
+        <!-- Process Flow -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Process Overview</h2>
+                <p class="card-description">Visual flow of the encryption/decryption process</p>
+            </div>
+            <div class="process-flow">
+                <div class="process-line"></div>
+                <div id="process-progress" class="process-progress" style="width: 0%;"></div>
+                <div class="process-steps">
+                    <div class="process-step" data-step="0">
+                        <div class="step-icon">📝</div>
+                        <div class="step-label">Input Text</div>
+                    </div>
+                    <div class="process-step" data-step="1">
+                        <div class="step-icon">✂️</div>
+                        <div class="step-label">Split into Pairs</div>
+                    </div>
+                    <div class="process-step" data-step="2">
+                        <div class="step-icon">🔍</div>
+                        <div class="step-label">Apply Rules</div>
+                    </div>
+                    <div class="process-step" data-step="3">
+                        <div class="step-icon">🔄</div>
+                        <div class="step-label">Transform</div>
+                    </div>
+                    <div class="process-step" data-step="4">
+                        <div class="step-icon">🔒</div>
+                        <div class="step-label">Output</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabs for Encryption/Decryption -->
+        <div class="card">
+            <div class="tabs">
+                <div class="tab active" data-tab="encrypt">Encryption Process</div>
+                <div class="tab" data-tab="decrypt">Decryption Process</div>
+            </div>
+
+            <!-- Encryption Tab Content -->
+            <div id="encrypt-tab" class="tab-content active">
+                <h3>Encryption Visualization</h3>
+                <p class="text-sm text-muted mb-4">Step-by-step process of Playfair encryption</p>
+
+                <div id="encryption-visualization" class="visualization-area">
+                    <div class="visualization-empty">
+                        Enter text and key, then click "Encrypt" to see visualization
+                    </div>
+                </div>
+
+                <div class="animation-controls">
+                    <div class="speed-control">
+                        <label for="animation-speed" class="text-sm">Animation Speed:</label>
+                        <input type="range" id="animation-speed" class="slider" min="0.5" max="3" step="0.1" value="1.5">
+                        <span id="speed-value" class="text-sm">1.5x</span>
+                    </div>
+                    <div class="btn-group">
+                        <button id="prev-step" class="btn btn-outline" disabled>Previous</button>
+                        <button id="reset-animation" class="btn btn-outline">Reset</button>
+                        <button id="auto-play" class="btn btn-primary">Auto Play</button>
+                        <button id="next-step" class="btn btn-outline" disabled>Next</button>
+                    </div>
+                </div>
+
+                <div class="explanation-box">
+                    <div class="explanation-title">How Playfair Encryption Works</div>
+                    <p>The Playfair cipher encrypts pairs of letters (digraphs) according to these rules:</p>
+                    <ol class="p-4">
+                        <li>If both letters are in the same row, take the letter to the right of each (wrapping around).</li>
+                        <li>If both letters are in the same column, take the letter below each (wrapping around).</li>
+                        <li>If letters form a rectangle, take the letter in the same row but in the column of the other letter.</li>
+                    </ol>
+                    <p>Special cases:</p>
+                    <ul class="p-4">
+                        <li>If the same letter appears twice, insert an 'X' between them.</li>
+                        <li>If the message has an odd number of letters, append an 'X'.</li>
+                        <li>I and J are treated as the same letter.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Decryption Tab Content -->
+            <div id="decrypt-tab" class="tab-content">
+                <h3>Decryption Visualization</h3>
+                <p class="text-sm text-muted mb-4">Step-by-step process of Playfair decryption</p>
+
+                <div id="decryption-visualization" class="visualization-area">
+                    <div class="visualization-empty">
+                        Enter ciphertext and key, then click "Decrypt" to see visualization
+                    </div>
+                </div>
+
+                <div class="animation-controls">
+                    <div class="speed-control">
+                        <label for="decryption-speed" class="text-sm">Animation Speed:</label>
+                        <input type="range" id="decryption-speed" class="slider" min="0.5" max="3" step="0.1" value="1.5">
+                        <span id="decrypt-speed-value" class="text-sm">1.5x</span>
+                    </div>
+                    <div class="btn-group">
+                        <button id="prev-decrypt-step" class="btn btn-outline" disabled>Previous</button>
+                        <button id="reset-decrypt" class="btn btn-outline">Reset</button>
+                        <button id="auto-play-decrypt" class="btn btn-primary">Auto Play</button>
+                        <button id="next-decrypt-step" class="btn btn-outline" disabled>Next</button>
+                    </div>
+                </div>
+
+                <div class="explanation-box">
+                    <div class="explanation-title">How Playfair Decryption Works</div>
+                    <p>The Playfair cipher decrypts pairs of letters (digraphs) according to these rules:</p>
+                    <ol class="p-4">
+                        <li>If both letters are in the same row, take the letter to the left of each (wrapping around).</li>
+                        <li>If both letters are in the same column, take the letter above each (wrapping around).</li>
+                        <li>If letters form a rectangle, take the letter in the same row but in the column of the other letter.</li>
+                    </ol>
+                    <p>After decryption, remove any padding 'X' characters that may have been added during encryption.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const plaintextInput = document.getElementById('plaintext');
+        const keyInput = document.getElementById('key');
+        const ciphertextInput = document.getElementById('ciphertext');
+        const decryptedInput = document.getElementById('decrypted');
+        const encryptBtn = document.getElementById('encrypt-btn');
+        const decryptBtn = document.getElementById('decrypt-btn');
+        const playfairMatrixEl = document.getElementById('playfair-matrix');
+        const encryptionVisualization = document.getElementById('encryption-visualization');
+        const decryptionVisualization = document.getElementById('decryption-visualization');
+        const processProgress = document.getElementById('process-progress');
+        const processSteps = document.querySelectorAll('.process-step');
+        const prevStepBtn = document.getElementById('prev-step');
+        const nextStepBtn = document.getElementById('next-step');
+        const resetAnimationBtn = document.getElementById('reset-animation');
+        const autoPlayBtn = document.getElementById('auto-play');
+        const animationSpeedSlider = document.getElementById('animation-speed');
+        const speedValueEl = document.getElementById('speed-value');
+        const prevDecryptStepBtn = document.getElementById('prev-decrypt-step');
+        const nextDecryptStepBtn = document.getElementById('next-decrypt-step');
+        const resetDecryptBtn = document.getElementById('reset-decrypt');
+        const autoPlayDecryptBtn = document.getElementById('auto-play-decrypt');
+        const decryptionSpeedSlider = document.getElementById('decryption-speed');
+        const decryptSpeedValueEl = document.getElementById('decrypt-speed-value');
+        const tabs = document.querySelectorAll('.tab');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        // State variables
+        let playfairMatrix = [];
+        let encryptionSteps = [];
+        let decryptionSteps = [];
+        let currentEncryptStep = 0;
+        let currentDecryptStep = 0;
+        let isAutoPlayingEncrypt = false;
+        let isAutoPlayingDecrypt = false;
+        let encryptionAutoPlayInterval;
+        let decryptionAutoPlayInterval;
+        let encryptionAnimationSpeed = 1.5;
+        let decryptionAnimationSpeed = 1.5;
+        let activeTab = 'encrypt';
+
+        // Initialize
+        function init() {
+            // Set up event listeners
+            encryptBtn.addEventListener('click', handleEncrypt);
+            decryptBtn.addEventListener('click', handleDecrypt);
+            prevStepBtn.addEventListener('click', handlePrevEncryptStep);
+            nextStepBtn.addEventListener('click', handleNextEncryptStep);
+            resetAnimationBtn.addEventListener('click', resetEncryptAnimation);
+            autoPlayBtn.addEventListener('click', toggleEncryptAutoPlay);
+            animationSpeedSlider.addEventListener('input', updateEncryptAnimationSpeed);
+            prevDecryptStepBtn.addEventListener('click', handlePrevDecryptStep);
+            nextDecryptStepBtn.addEventListener('click', handleNextDecryptStep);
+            resetDecryptBtn.addEventListener('click', resetDecryptAnimation);
+            autoPlayDecryptBtn.addEventListener('click', toggleDecryptAutoPlay);
+            decryptionSpeedSlider.addEventListener('input', updateDecryptAnimationSpeed);
+
+            // Tab switching
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tabContents.forEach(c => c.classList.remove('active'));
+                    tab.classList.add('active');
+                    activeTab = tab.dataset.tab;
+                    document.getElementById(`${activeTab}-tab`).classList.add('active');
+                    
+                    // Reset animations when switching tabs
+                    if (activeTab === 'encrypt') {
+                        resetEncryptAnimation();
+                    } else {
+                        resetDecryptAnimation();
+                    }
+                    
+                    updateProcessFlow();
+                });
+            });
+
+            // Generate initial matrix
+            if (keyInput.value) {
+                generatePlayfairMatrix(keyInput.value);
+                renderPlayfairMatrix();
+            }
+
+            // Initial encrypt if values are present
+            if (plaintextInput.value && keyInput.value) {
+                handleEncrypt();
+            }
+        }
+
+        // Generate Playfair Matrix from key
+        function generatePlayfairMatrix(key) {
+            // Normalize key: uppercase, replace J with I, remove duplicates
+            key = key.toUpperCase().replace(/J/g, 'I');
+            let uniqueChars = [];
+            for (let char of key) {
+                if (/[A-Z]/.test(char) && !uniqueChars.includes(char)) {
+                    uniqueChars.push(char);
+                }
+            }
+
+            // Add remaining alphabet
+            for (let i = 65; i <= 90; i++) {
+                let char = String.fromCharCode(i);
+                if (char === 'J') continue; // Skip J
+                if (!uniqueChars.includes(char)) {
+                    uniqueChars.push(char);
+                }
+            }
+
+            // Create 5x5 matrix
+            playfairMatrix = [];
+            for (let i = 0; i < 5; i++) {
+                let row = [];
+                for (let j = 0; j < 5; j++) {
+                    row.push(uniqueChars[i * 5 + j]);
+                }
+                playfairMatrix.push(row);
+            }
+
+            return playfairMatrix;
+        }
+
+        // Render Playfair Matrix in UI
+        function renderPlayfairMatrix() {
+            playfairMatrixEl.innerHTML = '';
+            for (let i = 0; i < 5; i++) {
+                for (let j = 0; j < 5; j++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'matrix-cell';
+                    cell.dataset.row = i;
+                    cell.dataset.col = j;
+                    cell.textContent = playfairMatrix[i][j];
+                    if (playfairMatrix[i][j] === 'I') {
+                        cell.textContent = 'I/J';
+                    }
+                    playfairMatrixEl.appendChild(cell);
+                }
+            }
+        }
+
+        // Find position of a character in the matrix
+        function findCharPosition(char) {
+            char = char.toUpperCase();
+            if (char === 'J') char = 'I'; // Replace J with I
+            
+            for (let i = 0; i < 5; i++) {
+                for (let j = 0; j < 5; j++) {
+                    if (playfairMatrix[i][j] === char) {
+                        return [i, j];
+                    }
+                }
+            }
+            return null;
+        }
+
+        // Prepare text for encryption (split into digraphs)
+        function prepareTextForEncryption(text) {
+            // Normalize: uppercase, replace J with I, remove non-alphabetic chars
+            text = text.toUpperCase().replace(/J/g, 'I').replace(/[^A-Z]/g, '');
+            
+            let digraphs = [];
+            let i = 0;
+            
+            while (i < text.length) {
+                if (i === text.length - 1) {
+                    // Last character, add X
+                    digraphs.push(text[i] + 'X');
+                    break;
+                }
+                
+                if (text[i] === text[i + 1]) {
+                    // Same letters, insert X
+                    digraphs.push(text[i] + 'X');
+                    i++;
+                } else {
+                    // Different letters, create pair
+                    digraphs.push(text[i] + text[i + 1]);
+                    i += 2;
+                }
+            }
+            
+            return digraphs;
+        }
+
+        // Encrypt a single digraph using Playfair rules
+        function encryptDigraph(digraph) {
+            const [row1, col1] = findCharPosition(digraph[0]);
+            const [row2, col2] = findCharPosition(digraph[1]);
+            
+            let encryptedDigraph = '';
+            let rule = '';
+            
+            if (row1 === row2) {
+                // Same row - take letters to the right (with wrapping)
+                encryptedDigraph = 
+                    playfairMatrix[row1][(col1 + 1) % 5] + 
+                    playfairMatrix[row2][(col2 + 1) % 5];
+                rule = 'same-row';
+            } else if (col1 === col2) {
+                // Same column - take letters below (with wrapping)
+                encryptedDigraph = 
+                    playfairMatrix[(row1 + 1) % 5][col1] + 
+                    playfairMatrix[(row2 + 1) % 5][col2];
+                rule = 'same-column';
+            } else {
+                // Rectangle - take letters at the other corners
+                encryptedDigraph = 
+                    playfairMatrix[row1][col2] + 
+                    playfairMatrix[row2][col1];
+                rule = 'rectangle';
+            }
+            
+            return {
+                original: digraph,
+                encrypted: encryptedDigraph,
+                positions: {
+                    original: [[row1, col1], [row2, col2]],
+                    encrypted: rule === 'same-row' 
+                        ? [[row1, (col1 + 1) % 5], [row2, (col2 + 1) % 5]]
+                        : rule === 'same-column'
+                            ? [[(row1 + 1) % 5, col1], [(row2 + 1) % 5, col2]]
+                            : [[row1, col2], [row2, col1]]
+                },
+                rule
+            };
+        }
+
+        // Encrypt plaintext using Playfair cipher
+        function encryptPlayfair(plaintext) {
+            const digraphs = prepareTextForEncryption(plaintext);
+            let ciphertext = '';
+            let steps = [];
+            
+            // Add initial step
+            steps.push({
+                type: 'prepare',
+                plaintext,
+                digraphs,
+                description: 'Preparing text by splitting into digraphs'
+            });
+            
+            // Process each digraph
+            for (let i = 0; i < digraphs.length; i++) {
+                const result = encryptDigraph(digraphs[i]);
+                ciphertext += result.encrypted;
+                
+                steps.push({
+                    type: 'encrypt-digraph',
+                    digraphIndex: i,
+                    digraph: digraphs[i],
+                    encryptedDigraph: result.encrypted,
+                    positions: result.positions,
+                    rule: result.rule,
+                    description: `Encrypting digraph ${digraphs[i]} using ${getRuleDescription(result.rule)}`
+                });
+            }
+            
+            // Add final step
+            steps.push({
+                type: 'complete',
+                ciphertext,
+                description: 'Encryption complete'
+            });
+            
+            return { ciphertext, steps };
+        }
+
+        // Decrypt a single digraph using Playfair rules
+        function decryptDigraph(digraph) {
+            const [row1, col1] = findCharPosition(digraph[0]);
+            const [row2, col2] = findCharPosition(digraph[1]);
+            
+            let decryptedDigraph = '';
+            let rule = '';
+            
+            if (row1 === row2) {
+                // Same row - take letters to the left (with wrapping)
+                decryptedDigraph = 
+                    playfairMatrix[row1][(col1 - 1 + 5) % 5] + 
+                    playfairMatrix[row2][(col2 - 1 + 5) % 5];
+                rule = 'same-row';
+            } else if (col1 === col2) {
+                // Same column - take letters above (with wrapping)
+                decryptedDigraph = 
+                    playfairMatrix[(row1 - 1 + 5) % 5][col1] + 
+                    playfairMatrix[(row2 - 1 + 5) % 5][col2];
+                rule = 'same-column';
+            } else {
+                // Rectangle - take letters at the other corners
+                decryptedDigraph = 
+                    playfairMatrix[row1][col2] + 
+                    playfairMatrix[row2][col1];
+                rule = 'rectangle';
+            }
+            
+            return {
+                original: digraph,
+                decrypted: decryptedDigraph,
+                positions: {
+                    original: [[row1, col1], [row2, col2]],
+                    decrypted: rule === 'same-row' 
+                        ? [[row1, (col1 - 1 + 5) % 5], [row2, (col2 - 1 + 5) % 5]]
+                        : rule === 'same-column'
+                            ? [[(row1 - 1 + 5) % 5, col1], [(row2 - 1 + 5) % 5, col2]]
+                            : [[row1, col2], [row2, col1]]
+                },
+                rule
+            };
+        }
+
+        // Decrypt ciphertext using Playfair cipher
+        function decryptPlayfair(ciphertext) {
+            // Normalize: uppercase, replace J with I, remove non-alphabetic chars
+            ciphertext = ciphertext.toUpperCase().replace(/J/g, 'I').replace(/[^A-Z]/g, '');
+            
+            // Split into digraphs
+            let digraphs = [];
+            for (let i = 0; i < ciphertext.length; i += 2) {
+                if (i + 1 < ciphertext.length) {
+                    digraphs.push(ciphertext.substring(i, i + 2));
+                } else {
+                    digraphs.push(ciphertext[i] + 'X');
+                }
+            }
+            
+            let plaintext = '';
+            let steps = [];
+            
+            // Add initial step
+            steps.push({
+                type: 'prepare',
+                ciphertext,
+                digraphs,
+                description: 'Preparing ciphertext by splitting into digraphs'
+            });
+            
+            // Process each digraph
+            for (let i = 0; i < digraphs.length; i++) {
+                const result = decryptDigraph(digraphs[i]);
+                plaintext += result.decrypted;
+                
+                steps.push({
+                    type: 'decrypt-digraph',
+                    digraphIndex: i,
+                    digraph: digraphs[i],
+                    decryptedDigraph: result.decrypted,
+                    positions: result.positions,
+                    rule: result.rule,
+                    description: `Decrypting digraph ${digraphs[i]} using ${getRuleDescription(result.rule)}`
+                });
+            }
+            
+            // Remove padding X's (simplified approach)
+            plaintext = plaintext.replace(/X$/g, '');
+            
+            // Add final step
+            steps.push({
+                type: 'complete',
+                plaintext,
+                description: 'Decryption complete'
+            });
+            
+            return { plaintext, steps };
+        }
+
+        // Get description for encryption/decryption rule
+        function getRuleDescription(rule) {
+            switch (rule) {
+                case 'same-row':
+                    return activeTab === 'encrypt' 
+                        ? 'Same Row Rule: Take letters to the right' 
+                        : 'Same Row Rule: Take letters to the left';
+                case 'same-column':
+                    return activeTab === 'encrypt' 
+                        ? 'Same Column Rule: Take letters below' 
+                        : 'Same Column Rule: Take letters above';
+                case 'rectangle':
+                    return 'Rectangle Rule: Take letters at the opposite corners';
+                default:
+                    return '';
+            }
+        }
+
+        // Handle encrypt button click
+        function handleEncrypt() {
+            // Generate matrix from key
+            generatePlayfairMatrix(keyInput.value);
+            renderPlayfairMatrix();
+            
+            // Encrypt plaintext
+            const { ciphertext, steps } = encryptPlayfair(plaintextInput.value);
+            ciphertextInput.value = ciphertext;
+            encryptionSteps = steps;
+            
+            // Reset visualization
+            resetEncryptAnimation();
+            
+            // Enable controls
+            prevStepBtn.disabled = true;
+            nextStepBtn.disabled = false;
+            
+            // Update UI
+            renderEncryptionStep(0);
+            updateProcessFlow();
+        }
+
+        // Handle decrypt button click
+        function handleDecrypt() {
+            // Generate matrix from key
+            generatePlayfairMatrix(keyInput.value);
+            renderPlayfairMatrix();
+            
+            // Decrypt ciphertext
+            const { plaintext, steps } = decryptPlayfair(ciphertextInput.value);
+            decryptedInput.value = plaintext;
+            decryptionSteps = steps;
+            
+            // Reset visualization
+            resetDecryptAnimation();
+            
+            // Enable controls
+            prevDecryptStepBtn.disabled = true;
+            nextDecryptStepBtn.disabled = false;
+            
+            // Update UI
+            renderDecryptionStep(0);
+            updateProcessFlow();
+        }
+
+        // Render encryption step visualization
+        function renderEncryptionStep(stepIndex) {
+            if (stepIndex < 0 || stepIndex >= encryptionSteps.length) return;
+            
+            currentEncryptStep = stepIndex;
+            const step = encryptionSteps[stepIndex];
+            
+            // Update process flow
+            updateProcessFlow();
+            
+            // Clear previous visualization
+            encryptionVisualization.innerHTML = '';
+            
+            // Reset matrix highlights
+            clearMatrixHighlights();
+            
+            if (step.type === 'prepare') {
+                // Render preparation step
+                const container = document.createElement('div');
+                container.className = 'p-4';
+                
+                const title = document.createElement('h3');
+                title.textContent = 'Preparing Text';
+                title.className = 'mb-4';
+                container.appendChild(title);
+                
+                const description = document.createElement('p');
+                description.textContent = `Original text: "${step.plaintext}"`;
+                description.className = 'mb-4';
+                container.appendChild(description);
+                
+                const digraphsTitle = document.createElement('p');
+                digraphsTitle.textContent = 'Splitting into digraphs:';
+                digraphsTitle.className = 'mb-2';
+                container.appendChild(digraphsTitle);
+                
+                const digraphsContainer = document.createElement('div');
+                digraphsContainer.className = 'digraph-container';
+                
+                step.digraphs.forEach((digraph, index) => {
+                    const digraphBox = document.createElement('div');
+                    digraphBox.className = 'digraph-box';
+                    
+                    const digraphTitle = document.createElement('div');
+                    digraphTitle.className = 'digraph-title';
+                    digraphTitle.textContent = `Pair ${index + 1}`;
+                    digraphBox.appendChild(digraphTitle);
+                    
+                    const digraphLetters = document.createElement('div');
+                    digraphLetters.className = 'digraph-letters';
+                    digraphLetters.textContent = digraph;
+                    digraphBox.appendChild(digraphLetters);
+                    
+                    digraphsContainer.appendChild(digraphBox);
+                });
+                
+                container.appendChild(digraphsContainer);
+                encryptionVisualization.appendChild(container);
+                
+            } else if (step.type === 'encrypt-digraph') {
+                // Render encryption step for a digraph
+                const container = document.createElement('div');
+                container.className = 'p-4';
+                
+                const title = document.createElement('h3');
+                title.textContent = `Encrypting Pair ${step.digraphIndex + 1}: ${step.digraph}`;
+                title.className = 'mb-4';
+                container.appendChild(title);
+                
+                const ruleDescription = document.createElement('p');
+                ruleDescription.textContent = step.description;
+                ruleDescription.className = 'mb-4';
+                container.appendChild(ruleDescription);
+                
+                const digraphBox = document.createElement('div');
+                digraphBox.className = 'digraph-box active mx-auto mb-4';
+                digraphBox.style.maxWidth = '200px';
+                
+                const originalTitle = document.createElement('div');
+                originalTitle.className = 'digraph-title';
+                originalTitle.textContent = 'Original';
+                digraphBox.appendChild(originalTitle);
+                
+                const originalLetters = document.createElement('div');
+                originalLetters.className = 'digraph-letters';
+                originalLetters.textContent = step.digraph;
+                digraphBox.appendChild(originalLetters);
+                
+                const arrow = document.createElement('div');
+                arrow.className = 'digraph-arrow';
+                arrow.textContent = '↓';
+                digraphBox.appendChild(arrow);
+                
+                const encryptedTitle = document.createElement('div');
+                encryptedTitle.className = 'digraph-title';
+                encryptedTitle.textContent = 'Encrypted';
+                digraphBox.appendChild(encryptedTitle);
+                
+                const encryptedLetters = document.createElement('div');
+                encryptedLetters.className = 'digraph-letters';
+                encryptedLetters.textContent = step.encryptedDigraph;
+                digraphBox.appendChild(encryptedLetters);
+                
+                const ruleText = document.createElement('div');
+                ruleText.className = 'digraph-rule';
+                ruleText.textContent = getRuleDescription(step.rule);
+                digraphBox.appendChild(ruleText);
+                
+                container.appendChild(digraphBox);
+                encryptionVisualization.appendChild(container);
+                
+                // Highlight matrix cells
+                highlightMatrixCells(step.positions.original, step.positions.encrypted);
+                
+            } else if (step.type === 'complete') {
+                // Render completion step
+                const container = document.createElement('div');
+                container.className = 'p-4 text-center';
+                
+                const title = document.createElement('h3');
+                title.textContent = 'Encryption Complete';
+                title.className = 'mb-4';
+                container.appendChild(title);
+                
+                const result = document.createElement('div');
+                result.className = 'p-4 bg-muted rounded text-center mb-4';
+                result.innerHTML = `<span class="text-sm">Ciphertext:</span><br><span class="text-2xl font-mono font-bold">${step.ciphertext}</span>`;
+                container.appendChild(result);
+                
+                encryptionVisualization.appendChild(container);
+            }
+            
+            // Update button states
+            prevStepBtn.disabled = stepIndex === 0;
+            nextStepBtn.disabled = stepIndex === encryptionSteps.length - 1;
+        }
+
+        // Render decryption step visualization
+        function renderDecryptionStep(stepIndex) {
+            if (stepIndex < 0 || stepIndex >= decryptionSteps.length) return;
+            
+            currentDecryptStep = stepIndex;
+            const step = decryptionSteps[stepIndex];
+            
+            // Update process flow
+            updateProcessFlow();
+            
+            // Clear previous visualization
+            decryptionVisualization.innerHTML = '';
+            
+            // Reset matrix highlights
+            clearMatrixHighlights();
+            
+            if (step.type === 'prepare') {
+                // Render preparation step
+                const container = document.createElement('div');
+                container.className = 'p-4';
+                
+                const title = document.createElement('h3');
+                title.textContent = 'Preparing Ciphertext';
+                title.className = 'mb-4';
+                container.appendChild(title);
+                
+                const description = document.createElement('p');
+                description.textContent = `Ciphertext: "${step.ciphertext}"`;
+                description.className = 'mb-4';
+                container.appendChild(description);
+                
+                const digraphsTitle = document.createElement('p');
+                digraphsTitle.textContent = 'Splitting into digraphs:';
+                digraphsTitle.className = 'mb-2';
+                container.appendChild(digraphsTitle);
+                
+                const digraphsContainer = document.createElement('div');
+                digraphsContainer.className = 'digraph-container';
+                
+                step.digraphs.forEach((digraph, index) => {
+                    const digraphBox = document.createElement('div');
+                    digraphBox.className = 'digraph-box';
+                    
+                    const digraphTitle = document.createElement('div');
+                    digraphTitle.className = 'digraph-title';
+                    digraphTitle.textContent = `Pair ${index + 1}`;
+                    digraphBox.appendChild(digraphTitle);
+                    
+                    const digraphLetters = document.createElement('div');
+                    digraphLetters.className = 'digraph-letters';
+                    digraphLetters.textContent = digraph;
+                    digraphBox.appendChild(digraphLetters);
+                    
+                    digraphsContainer.appendChild(digraphBox);
+                });
+                
+                container.appendChild(digraphsContainer);
+                decryptionVisualization.appendChild(container);
+                
+            } else if (step.type === 'decrypt-digraph') {
+                // Render decryption step for a digraph
+                const container = document.createElement('div');
+                container.className = 'p-4';
+                
+                const title = document.createElement('h3');
+                title.textContent = `Decrypting Pair ${step.digraphIndex + 1}: ${step.digraph}`;
+                title.className = 'mb-4';
+                container.appendChild(title);
+                
+                const ruleDescription = document.createElement('p');
+                ruleDescription.textContent = step.description;
+                ruleDescription.className = 'mb-4';
+                container.appendChild(ruleDescription);
+                
+                const digraphBox = document.createElement('div');
+                digraphBox.className = 'digraph-box active mx-auto mb-4';
+                digraphBox.style.maxWidth = '200px';
+                
+                const originalTitle = document.createElement('div');
+                originalTitle.className = 'digraph-title';
+                originalTitle.textContent = 'Ciphertext';
+                digraphBox.appendChild(originalTitle);
+                
+                const originalLetters = document.createElement('div');
+                originalLetters.className = 'digraph-letters';
+                originalLetters.textContent = step.digraph;
+                digraphBox.appendChild(originalLetters);
+                
+                const arrow = document.createElement('div');
+                arrow.className = 'digraph-arrow';
+                arrow.textContent = '↓';
+                digraphBox.appendChild(arrow);
+                
+                const decryptedTitle = document.createElement('div');
+                decryptedTitle.className = 'digraph-title';
+                decryptedTitle.textContent = 'Decrypted';
+                digraphBox.appendChild(decryptedTitle);
+                
+                const decryptedLetters = document.createElement('div');
+                decryptedLetters.className = 'digraph-letters';
+                decryptedLetters.textContent = step.decryptedDigraph;
+                digraphBox.appendChild(decryptedLetters);
+                
+                const ruleText = document.createElement('div');
+                ruleText.className = 'digraph-rule';
+                ruleText.textContent = getRuleDescription(step.rule);
+                digraphBox.appendChild(ruleText);
+                
+                container.appendChild(digraphBox);
+                decryptionVisualization.appendChild(container);
+                
+                // Highlight matrix cells
+                highlightMatrixCells(step.positions.original, step.positions.decrypted);
+                
+            } else if (step.type === 'complete') {
+                // Render completion step
+                const container = document.createElement('div');
+                container.className = 'p-4 text-center';
+                
+                const title = document.createElement('h3');
+                title.textContent = 'Decryption Complete';
+                title.className = 'mb-4';
+                container.appendChild(title);
+                
+                const result = document.createElement('div');
+                result.className = 'p-4 bg-muted rounded text-center mb-4';
+                result.innerHTML = `<span class="text-sm">Plaintext:</span><br><span class="text-2xl font-mono font-bold">${step.plaintext}</span>`;
+                container.appendChild(result);
+                
+                decryptionVisualization.appendChild(container);
+            }
+            
+            // Update button states
+            prevDecryptStepBtn.disabled = stepIndex === 0;
+            nextDecryptStepBtn.disabled = stepIndex === decryptionSteps.length - 1;
+        }
+
+        // Highlight matrix cells for current step
+        function highlightMatrixCells(originalPositions, transformedPositions) {
+            // Clear previous highlights
+            clearMatrixHighlights();
+            
+            // Highlight original positions
+            originalPositions.forEach(([row, col]) => {
+                const cell = document.querySelector(`.matrix-cell[data-row="${row}"][data-col="${col}"]`);
+                if (cell) {
+                    cell.classList.add('highlight');
+                }
+            });
+            
+            // Highlight transformed positions
+            transformedPositions.forEach(([row, col]) => {
+                const cell = document.querySelector(`.matrix-cell[data-row="${row}"][data-col="${col}"]`);
+                if (cell) {
+                    cell.classList.add('highlight-secondary');
+                }
+            });
+        }
+
+        // Clear all matrix highlights
+        function clearMatrixHighlights() {
+            document.querySelectorAll('.matrix-cell').forEach(cell => {
+                cell.classList.remove('highlight', 'highlight-secondary');
+            });
+        }
+
+        // Update process flow visualization
+        function updateProcessFlow() {
+            const steps = activeTab === 'encrypt' ? encryptionSteps : decryptionSteps;
+            const currentStep = activeTab === 'encrypt' ? currentEncryptStep : currentDecryptStep;
+            
+            if (steps.length === 0) return;
+            
+            // Calculate progress percentage
+            let progressPercent = 0;
+            
+            if (steps[currentStep].type === 'prepare') {
+                progressPercent = 0;
+            } else if (steps[currentStep].type === 'complete') {
+                progressPercent = 100;
+            } else {
+                // Calculate based on current digraph index
+                const totalDigraphs = steps.filter(s => s.type.includes('digraph')).length;
+                const currentDigraphIndex = steps[currentStep].digraphIndex;
+                progressPercent = ((currentDigraphIndex + 1) / totalDigraphs) * 80;
+            }
+            
+            // Update progress bar
+            processProgress.style.width = `${progressPercent}%`;
+            
+            // Update step indicators
+            processSteps.forEach(step => {
+                const stepIndex = parseInt(step.dataset.step);
+                
+                if (steps[currentStep].type === 'prepare' && stepIndex === 0) {
+                    step.classList.add('active');
+                } else if (steps[currentStep].type === 'complete' && stepIndex === 4) {
+                    step.classList.add('active');
+                } else if (steps[currentStep].type.includes('digraph')) {
+                    if (stepIndex >= 1 && stepIndex <= 3) {
+                        step.classList.add('active');
+                    } else {
+                        step.classList.remove('active');
+                    }
+                } else {
+                    step.classList.remove('active');
+                }
+            });
+        }
+
+        // Handle previous encryption step button
+        function handlePrevEncryptStep() {
+            if (currentEncryptStep > 0) {
+                renderEncryptionStep(currentEncryptStep - 1);
+            }
+        }
+
+        // Handle next encryption step button
+        function handleNextEncryptStep() {
+            if (currentEncryptStep < encryptionSteps.length - 1) {
+                renderEncryptionStep(currentEncryptStep + 1);
+            }
+        }
+
+        // Handle previous decryption step button
+        function handlePrevDecryptStep() {
+            if (currentDecryptStep > 0) {
+                renderDecryptionStep(currentDecryptStep - 1);
+            }
+        }
+
+        // Handle next decryption step button
+        function handleNextDecryptStep() {
+            if (currentDecryptStep < decryptionSteps.length - 1) {
+                renderDecryptionStep(currentDecryptStep + 1);
+            }
+        }
+
+        // Reset encryption animation
+        function resetEncryptAnimation() {
+            clearInterval(encryptionAutoPlayInterval);
+            isAutoPlayingEncrypt = false;
+            autoPlayBtn.textContent = 'Auto Play';
+            autoPlayBtn.classList.remove('btn-destructive');
+            autoPlayBtn.classList.add('btn-primary');
+            currentEncryptStep = 0;
+            renderEncryptionStep(0);
+        }
+
+        // Reset decryption animation
+        function resetDecryptAnimation() {
+            clearInterval(decryptionAutoPlayInterval);
+            isAutoPlayingDecrypt = false;
+            autoPlayDecryptBtn.textContent = 'Auto Play';
+            autoPlayDecryptBtn.classList.remove('btn-destructive');
+            autoPlayDecryptBtn.classList.add('btn-primary');
+            currentDecryptStep = 0;
+            renderDecryptionStep(0);
+        }
+
+        // Toggle encryption auto-play
+        function toggleEncryptAutoPlay() {
+            if (isAutoPlayingEncrypt) {
+                clearInterval(encryptionAutoPlayInterval);
+                isAutoPlayingEncrypt = false;
+                autoPlayBtn.textContent = 'Auto Play';
+                autoPlayBtn.classList.remove('btn-destructive');
+                autoPlayBtn.classList.add('btn-primary');
+            } else {
+                isAutoPlayingEncrypt = true;
+                autoPlayBtn.textContent = 'Pause';
+                autoPlayBtn.classList.remove('btn-primary');
+                autoPlayBtn.classList.add('btn-destructive');
+                
+                encryptionAutoPlayInterval = setInterval(() => {
+                    if (currentEncryptStep < encryptionSteps.length - 1) {
+                        renderEncryptionStep(currentEncryptStep + 1);
+                    } else {
+                        clearInterval(encryptionAutoPlayInterval);
+                        isAutoPlayingEncrypt = false;
+                        autoPlayBtn.textContent = 'Auto Play';
+                        autoPlayBtn.classList.remove('btn-destructive');
+                        autoPlayBtn.classList.add('btn-primary');
+                    }
+                }, 3000 / encryptionAnimationSpeed);
+            }
+        }
+
+        // Toggle decryption auto-play
+        function toggleDecryptAutoPlay() {
+            if (isAutoPlayingDecrypt) {
+                clearInterval(decryptionAutoPlayInterval);
+                isAutoPlayingDecrypt = false;
+                autoPlayDecryptBtn.textContent = 'Auto Play';
+                autoPlayDecryptBtn.classList.remove('btn-destructive');
+                autoPlayDecryptBtn.classList.add('btn-primary');
+            } else {
+                isAutoPlayingDecrypt = true;
+                autoPlayDecryptBtn.textContent = 'Pause';
+                autoPlayDecryptBtn.classList.remove('btn-primary');
+                autoPlayDecryptBtn.classList.add('btn-destructive');
+                
+                decryptionAutoPlayInterval = setInterval(() => {
+                    if (currentDecryptStep < decryptionSteps.length - 1) {
+                        renderDecryptionStep(currentDecryptStep + 1);
+                    } else {
+                        clearInterval(decryptionAutoPlayInterval);
+                        isAutoPlayingDecrypt = false;
+                        autoPlayDecryptBtn.textContent = 'Auto Play';
+                        autoPlayDecryptBtn.classList.remove('btn-destructive');
+                        autoPlayDecryptBtn.classList.add('btn-primary');
+                    }
+                }, 3000 / decryptionAnimationSpeed);
+            }
+        }
+
+        // Update encryption animation speed
+        function updateEncryptAnimationSpeed() {
+            encryptionAnimationSpeed = parseFloat(animationSpeedSlider.value);
+            speedValueEl.textContent = encryptionAnimationSpeed.toFixed(1) + 'x';
+            
+            if (isAutoPlayingEncrypt) {
+                clearInterval(encryptionAutoPlayInterval);
+                encryptionAutoPlayInterval = setInterval(() => {
+                    if (currentEncryptStep < encryptionSteps.length - 1) {
+                        renderEncryptionStep(currentEncryptStep + 1);
+                    } else {
+                        clearInterval(encryptionAutoPlayInterval);
+                        isAutoPlayingEncrypt = false;
+                        autoPlayBtn.textContent = 'Auto Play';
+                        autoPlayBtn.classList.remove('btn-destructive');
+                        autoPlayBtn.classList.add('btn-primary');
+                    }
+                }, 3000 / encryptionAnimationSpeed);
+            }
+        }
+
+        // Update decryption animation speed
+        function updateDecryptAnimationSpeed() {
+            decryptionAnimationSpeed = parseFloat(decryptionSpeedSlider.value);
+            decryptSpeedValueEl.textContent = decryptionAnimationSpeed.toFixed(1) + 'x';
+            
+            if (isAutoPlayingDecrypt) {
+                clearInterval(decryptionAutoPlayInterval);
+                decryptionAutoPlayInterval = setInterval(() => {
+                    if (currentDecryptStep < decryptionSteps.length - 1) {
+                        renderDecryptionStep(currentDecryptStep + 1);
+                    } else {
+                        clearInterval(decryptionAutoPlayInterval);
+                        isAutoPlayingDecrypt = false;
+                        autoPlayDecryptBtn.textContent = 'Auto Play';
+                        autoPlayDecryptBtn.classList.remove('btn-destructive');
+                        autoPlayDecryptBtn.classList.add('btn-primary');
+                    }
+                }, 3000 / decryptionAnimationSpeed);
+            }
+        }
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

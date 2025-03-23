@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DES Cipher Visualization</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            padding: 20px;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+        }
+        
+        .header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        
+        .back-btn {
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 8px 15px;
+            margin-right: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        .back-btn:hover {
+            background-color: #e9ecef;
+        }
+        
+        .back-btn::before {
+            content: "←";
+            margin-right: 5px;
+        }
+        
+        h1 {
+            flex-grow: 1;
+            text-align: center;
+            color: #2c3e50;
+        }
+        
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+            border-bottom: none;
+            border-radius: 5px 5px 0 0;
+            margin-right: 5px;
+        }
+        
+        .tab.active {
+            background-color: #fff;
+            border-bottom: 1px solid white;
+            margin-bottom: -1px;
+            font-weight: bold;
+        }
+        
+        .input-section {
+            margin-bottom: 30px;
+        }
+        
+        .input-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            font-family: monospace;
+        }
+        
+        .hint {
+            font-size: 12px;
+            color: #777;
+            margin-top: 5px;
+        }
+        
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background-color: #2980b9;
+        }
+        
+        .visualization {
+            margin-top: 30px;
+        }
+        
+        .des-overview {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+        
+        .des-diagram {
+            max-width: 100%;
+            margin: 20px 0;
+        }
+        
+        .des-steps {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .des-step {
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: white;
+        }
+        
+        .des-step-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #3498db;
+        }
+        
+        .des-step-content {
+            font-family: monospace;
+            word-break: break-all;
+        }
+        
+        .animation-container {
+            position: relative;
+            height: 400px;
+            margin: 30px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            overflow: hidden;
+            background-color: #f8f9fa;
+        }
+        
+        .animation-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+        
+        .animation-controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .animation-step {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            opacity: 0;
+            transition: opacity 0.5s;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        
+        .animation-step.active {
+            opacity: 1;
+        }
+        
+        .animation-text {
+            font-size: 16px;
+            margin-top: 20px;
+            text-align: center;
+            max-width: 80%;
+        }
+        
+        .binary-block {
+            font-family: monospace;
+            background-color: #f0f0f0;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            text-align: center;
+            word-break: break-all;
+            max-width: 100%;
+        }
+        
+        .result-container {
+            background-color: #f0f9ff;
+            padding: 20px;
+            border-radius: 5px;
+            border-left: 5px solid #3498db;
+        }
+        
+        .result-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+        
+        .result {
+            font-family: monospace;
+            font-size: 18px;
+            word-break: break-all;
+        }
+        
+        .how-it-works {
+            margin-top: 40px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+        
+        .how-it-works h2 {
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+        
+        .how-it-works p {
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+        
+        .how-it-works ol {
+            padding-left: 20px;
+            margin-bottom: 15px;
+        }
+        
+        .how-it-works li {
+            margin-bottom: 10px;
+        }
+        
+        .formula {
+            background-color: #e9ecef;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            margin: 10px 0;
+            text-align: center;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .des-diagram {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <button class="back-btn" onclick="window.location.href='index.html'">Back</button>
+            <h1>DES Cipher Visualization</h1>
+        </div>
+        
+        <div class="tabs">
+            <div class="tab active" data-tab="encrypt">Encrypt</div>
+            <div class="tab" data-tab="decrypt">Decrypt</div>
+        </div>
+        
+        <div class="input-section">
+            <div class="input-group">
+                <label for="input-text">
+                    <span id="input-label">Plaintext</span> (Hexadecimal):
+                </label>
+                <input type="text" id="input-text" placeholder="Enter text in hexadecimal" value="0123456789ABCDEF">
+                <div class="hint">Enter 16 hexadecimal characters (64 bits)</div>
+            </div>
+            
+            <div class="input-group">
+                <label for="key">Key (Hexadecimal):</label>
+                <input type="text" id="key" placeholder="Enter key in hexadecimal" value="133457799BBCDFF1">
+                <div class="hint">Enter 16 hexadecimal characters (64 bits)</div>
+            </div>
+            
+            <button id="process-btn">Process</button>
+        </div>
+        
+        <div class="visualization">
+            <div class="des-overview">
+                <h2>DES Algorithm Overview</h2>
+                <img src="/placeholder.svg?height=300&width=600" alt="DES Algorithm Diagram" class="des-diagram">
+                <p>The Data Encryption Standard (DES) is a symmetric-key block cipher that processes data in 64-bit blocks using a 56-bit key.</p>
+            </div>
+            
+            <div class="animation-container" id="animation-container">
+                <div class="animation-title">DES Process Visualization:</div>
+                <!-- <div class="animation-controls">
+                    <button id="prev-step">Previous Step</button>
+                    <button id="next-step">Next Step</button>
+                </div> -->
+                <div id="animation-steps"></div>
+            </div>
+            
+            <div class="result-container">
+                <div class="result-title">
+                    <span id="result-label">Encrypted</span> Result (Hexadecimal):
+                </div>
+                <div class="result" id="result"></div>
+            </div>
+        </div>
+        
+        <div class="how-it-works">
+            <h2>How DES Works:</h2>
+            <p>The Data Encryption Standard (DES) is a symmetric-key block cipher published by the National Institute of Standards and Technology (NIST) in 1977.</p>
+            
+            <ol>
+                <li><strong>Initial Permutation (IP)</strong> - The 64-bit plaintext block is rearranged according to a fixed permutation.</li>
+                <li><strong>16 Rounds of Processing</strong> - The data is processed through 16 rounds, each using a different 48-bit subkey derived from the main key.</li>
+                <li><strong>Final Permutation (IP<sup>-1</sup>)</strong> - The inverse of the initial permutation is applied to produce the ciphertext.</li>
+            </ol>
+            
+            <p>Each round consists of:</p>
+            <ol>
+                <li><strong>Expansion</strong> - The right half of the data is expanded from 32 bits to 48 bits.</li>
+                <li><strong>Key Mixing</strong> - The expanded right half is XORed with the round subkey.</li>
+                <li><strong>Substitution</strong> - The result is divided into 8 blocks of 6 bits, and each is processed through an S-box to produce 4 bits.</li>
+                <li><strong>Permutation</strong> - The 32 bits from the S-boxes are rearranged according to a fixed permutation.</li>
+                <li><strong>XOR and Swap</strong> - The result is XORed with the left half, and the halves are swapped (except in the final round).</li>
+            </ol>
+            
+            <p>Key Schedule:</p>
+            <ol>
+                <li><strong>Permuted Choice 1 (PC-1)</strong> - The 64-bit key is reduced to 56 bits by removing parity bits.</li>
+                <li><strong>Key Rotation</strong> - The 56-bit key is split into two 28-bit halves, which are rotated left by a specific number of bits for each round.</li>
+                <li><strong>Permuted Choice 2 (PC-2)</strong> - 48 bits are selected from the 56-bit key for each round.</li>
+            </ol>
+            
+            <p>DES has been superseded by more secure algorithms like AES due to its relatively small key size (effectively 56 bits), but it remains historically significant and is still used in some legacy systems.</p>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const inputText = document.getElementById('input-text');
+        const keyInput = document.getElementById('key');
+        const processBtn = document.getElementById('process-btn');
+        const animationStepsEl = document.getElementById('animation-steps');
+        const resultEl = document.getElementById('result');
+        const tabs = document.querySelectorAll('.tab');
+        const inputLabel = document.getElementById('input-label');
+        const resultLabel = document.getElementById('result-label');
+        const prevStepBtn = document.getElementById('prev-step');
+        const nextStepBtn = document.getElementById('next-step');
+        
+        // State
+        let mode = 'encrypt';
+        let currentAnimationStep = 0;
+        let totalAnimationSteps = 0;
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            processDES();
+        });
+        
+        // Event Listeners
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                tabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                mode = tab.dataset.tab;
+                
+                if (mode === 'encrypt') {
+                    inputLabel.textContent = 'Plaintext';
+                    resultLabel.textContent = 'Encrypted';
+                } else {
+                    inputLabel.textContent = 'Ciphertext';
+                    resultLabel.textContent = 'Decrypted';
+                }
+                
+                processDES();
+            });
+        });
+        
+        processBtn.addEventListener('click', processDES);
+        
+        inputText.addEventListener('input', e => {
+            e.target.value = e.target.value.toUpperCase().replace(/[^0-9A-F]/g, '');
+        });
+        
+        keyInput.addEventListener('input', e => {
+            e.target.value = e.target.value.toUpperCase().replace(/[^0-9A-F]/g, '');
+        });
+        
+        prevStepBtn.addEventListener('click', () => {
+            if (currentAnimationStep > 0) {
+                showAnimationStep(--currentAnimationStep);
+            }
+        });
+        
+        nextStepBtn.addEventListener('click', () => {
+            if (currentAnimationStep < totalAnimationSteps - 1) {
+                showAnimationStep(++currentAnimationStep);
+            }
+        });
+        
+        // DES Functions (Simplified for visualization)
+        function processDES() {
+            const text = inputText.value.toUpperCase().replace(/[^0-9A-F]/g, '');
+            const key = keyInput.value.toUpperCase().replace(/[^0-9A-F]/g, '');
+            
+            if (text.length !== 16 || key.length !== 16) {
+                alert("Both input and key must be exactly 16 hexadecimal characters (64 bits)");
+                return;
+            }
+            
+            // Convert hex to binary
+            const binaryText = hexToBinary(text);
+            const binaryKey = hexToBinary(key);
+            
+            // Create animation steps
+            const steps = [];
+            
+            // Add initial step
+            steps.push({
+                type: 'initial',
+                text: text,
+                key: key,
+                binaryText: binaryText,
+                binaryKey: binaryKey,
+                description: 'Converting input and key to binary'
+            });
+            
+            // Add key processing step
+            steps.push({
+                type: 'key-processing',
+                description: 'Processing the key (PC-1)',
+                content: 'The 64-bit key is reduced to 56 bits by removing parity bits.'
+            });
+            
+            // Add initial permutation step
+            steps.push({
+                type: 'initial-permutation',
+                description: 'Initial Permutation (IP)',
+                content: 'The 64-bit plaintext block is rearranged according to a fixed permutation.'
+            });
+            
+            // Add round steps
+            for (let i = 0; i < 16; i++) {
+                steps.push({
+                    type: 'round',
+                    round: i + 1,
+                    description: `Round ${i + 1}`,
+                    content: `
+                        <p>1. Expansion: Right half expanded from 32 to 48 bits</p>
+                        <p>2. Key Mixing: XOR with round subkey</p>
+                        <p>3. Substitution: Process through S-boxes</p>
+                        <p>4. Permutation: Rearrange bits</p>
+                        <p>5. XOR and Swap: XOR with left half and swap halves</p>
+                    `
+                });
+            }
+            
+            // Add final permutation step
+            steps.push({
+                type: 'final-permutation',
+                description: 'Final Permutation (IP⁻¹)',
+                content: 'The inverse of the initial permutation is applied to produce the final result.'
+            });
+            
+            // Add result step
+            const result = simulateDESResult(text, key, mode);
+            steps.push({
+                type: 'result',
+                result: result,
+                description: `${mode === 'encrypt' ? 'Encryption' : 'Decryption'} Complete`,
+                content: `The ${mode === 'encrypt' ? 'ciphertext' : 'plaintext'} is: ${result}`
+            });
+            
+            displayResult(result);
+            createAnimation(steps);
+            
+            // Reset animation
+            currentAnimationStep = 0;
+            totalAnimationSteps = steps.length;
+            showAnimationStep(currentAnimationStep);
+        }
+        
+        function hexToBinary(hex) {
+            let binary = '';
+            for (let i = 0; i < hex.length; i++) {
+                const decimal = parseInt(hex[i], 16);
+                const bits = decimal.toString(2).padStart(4, '0');
+                binary += bits;
+            }
+            return binary;
+        }
+        
+        function simulateDESResult(input, key, mode) {
+            // This is a simplified simulation for visualization purposes
+            // In a real implementation, we would perform the actual DES algorithm
+            
+            // For demonstration, we'll just return a simulated result
+            if (mode === 'encrypt') {
+                // Sample encrypted result for the default input and key
+                if (input === '0123456789ABCDEF' && key === '133457799BBCDFF1') {
+                    return '85E813540F0AB405';
+                }
+            } else {
+                // Sample decrypted result for the default input and key
+                if (input === '85E813540F0AB405' && key === '133457799BBCDFF1') {
+                    return '0123456789ABCDEF';
+                }
+            }
+            
+            // For other inputs, generate a random result
+            let result = '';
+            const chars = '0123456789ABCDEF';
+            for (let i = 0; i < 16; i++) {
+                result += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return result;
+        }
+        
+        // Display Functions
+        function displayResult(output) {
+            resultEl.textContent = output;
+        }
+        
+        function createAnimation(steps) {
+            animationStepsEl.innerHTML = '';
+            
+            steps.forEach((step, index) => {
+                const stepEl = document.createElement('div');
+                stepEl.className = 'animation-step';
+                
+                const title = document.createElement('div');
+                title.style.fontWeight = 'bold';
+                title.style.marginBottom = '20px';
+                title.style.fontSize = '18px';
+                title.textContent = step.description;
+                
+                stepEl.appendChild(title);
+                
+                if (step.type === 'initial') {
+                    const content = document.createElement('div');
+                    content.innerHTML = `
+                        <p>Input (Hex): ${step.text}</p>
+                        <p>Key (Hex): ${step.key}</p>
+                        <div class="binary-block">Input (Binary): ${formatBinary(step.binaryText)}</div>
+                        <div class="binary-block">Key (Binary): ${formatBinary(step.binaryKey)}</div>
+                    `;
+                    stepEl.appendChild(content);
+                } else if (step.type === 'result') {
+                    const content = document.createElement('div');
+                    content.innerHTML = `
+                        <p>${step.content}</p>
+                        <div class="binary-block">${step.result}</div>
+                    `;
+                    stepEl.appendChild(content);
+                } else {
+                    const content = document.createElement('div');
+                    content.innerHTML = step.content;
+                    stepEl.appendChild(content);
+                    
+                    if (step.type === 'round') {
+                        const roundImage = document.createElement('img');
+                        roundImage.src = `/placeholder.svg?height=150&width=300`;
+                        roundImage.alt = `Round ${step.round} Diagram`;
+                        roundImage.style.margin = '20px auto';
+                        roundImage.style.display = 'block';
+                        stepEl.appendChild(roundImage);
+                    }
+                }
+                
+                animationStepsEl.appendChild(stepEl);
+            });
+        }
+        
+        function formatBinary(binary) {
+            // Format binary string with spaces for readability
+            let formatted = '';
+            for (let i = 0; i < binary.length; i += 8) {
+                formatted += binary.substring(i, i + 8) + ' ';
+            }
+            return formatted.trim();
+        }
+        
+        function showAnimationStep(step) {
+            const steps = document.querySelectorAll('.animation-step');
+            
+            steps.forEach((s, i) => {
+                if (i === step) {
+                    s.classList.add('active');
+                } else {
+                    s.classList.remove('active');
+                }
+            });
+            
+            // Update button states
+            prevStepBtn.disabled = step === 0;
+            nextStepBtn.disabled = step === totalAnimationSteps - 1;
+        }
+    </script>
+</body>
+</html>

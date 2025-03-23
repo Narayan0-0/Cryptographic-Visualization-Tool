@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vigenère Cipher Visualization</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            padding: 20px;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+        }
+        
+        .header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        
+        .back-btn {
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 8px 15px;
+            margin-right: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        .back-btn:hover {
+            background-color: #e9ecef;
+        }
+        
+        .back-btn::before {
+            content: "←";
+            margin-right: 5px;
+        }
+        
+        h1 {
+            flex-grow: 1;
+            text-align: center;
+            color: #2c3e50;
+        }
+        
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+            border-bottom: none;
+            border-radius: 5px 5px 0 0;
+            margin-right: 5px;
+        }
+        
+        .tab.active {
+            background-color: #fff;
+            border-bottom: 1px solid white;
+            margin-bottom: -1px;
+            font-weight: bold;
+        }
+        
+        .input-section {
+            margin-bottom: 30px;
+        }
+        
+        .input-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        
+        .hint {
+            font-size: 12px;
+            color: #777;
+            margin-top: 5px;
+        }
+        
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background-color: #2980b9;
+        }
+        
+        .visualization {
+            margin-top: 30px;
+        }
+        
+        .vigenere-table-container {
+            margin-bottom: 30px;
+            overflow-x: auto;
+        }
+        
+        .vigenere-table-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+        
+        .vigenere-table {
+            border-collapse: collapse;
+            margin: 0 auto;
+        }
+        
+        .vigenere-table th, .vigenere-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+            min-width: 30px;
+            height: 30px;
+            font-family: monospace;
+        }
+        
+        .vigenere-table th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+        }
+        
+        .vigenere-table td.highlight {
+            background-color: #ffeb3b;
+        }
+        
+        .key-expansion-container {
+            margin-bottom: 30px;
+        }
+        
+        .key-expansion-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+        
+        .key-expansion {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+        
+        .key-letter {
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #e9f7fe;
+            border: 1px solid #bde0fe;
+            border-radius: 3px;
+            font-family: monospace;
+            font-size: 16px;
+        }
+        
+        .animation-container {
+            position: relative;
+            height: 300px;
+            margin: 30px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            overflow: hidden;
+            background-color: #f8f9fa;
+        }
+        
+        .animation-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+        
+        .animation-controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .animation-step {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.5s;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        
+        .animation-step.active {
+            opacity: 1;
+        }
+        
+        .animation-text {
+            font-size: 16px;
+            margin-top: 20px;
+            text-align: center;
+            max-width: 80%;
+        }
+        
+        .animation-letters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        
+        .animation-letter {
+            width: 40px;
+            height: 40px;
+            background-color: white;
+            border: 1px solid #ddd;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: bold;
+            position: relative;
+        }
+        
+        .animation-letter.highlight {
+            background-color: #ffeb3b;
+        }
+        
+        .animation-formula {
+            font-family: monospace;
+            background-color: #f0f0f0;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 15px;
+            text-align: center;
+        }
+        
+        .result-container {
+            background-color: #f0f9ff;
+            padding: 20px;
+            border-radius: 5px;
+            border-left: 5px solid #3498db;
+        }
+        
+        .result-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+        
+        .result {
+            font-family: monospace;
+            font-size: 24px;
+            letter-spacing: 2px;
+            word-break: break-all;
+        }
+        
+        .how-it-works {
+            margin-top: 40px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+        
+        .how-it-works h2 {
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+        
+        .how-it-works p {
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+        
+        .how-it-works ol {
+            padding-left: 20px;
+            margin-bottom: 15px;
+        }
+        
+        .how-it-works li {
+            margin-bottom: 10px;
+        }
+        
+        .formula {
+            background-color: #e9ecef;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            margin: 10px 0;
+            text-align: center;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .animation-letter {
+                width: 30px;
+                height: 30px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <button class="back-btn" onclick="window.location.href='index.html'">Back</button>
+            <h1>Vigenère Cipher Visualization</h1>
+        </div>
+        
+        <div class="tabs">
+            <div class="tab active" data-tab="encrypt">Encrypt</div>
+            <div class="tab" data-tab="decrypt">Decrypt</div>
+        </div>
+        
+        <div class="input-section">
+            <div class="input-group">
+                <label for="input-text">
+                    <span id="input-label">Plaintext</span>:
+                </label>
+                <input type="text" id="input-text" placeholder="Enter text to encrypt" value="ATTACKATDAWN">
+                <div class="hint">Only letters A-Z are allowed (automatically converted to uppercase)</div>
+            </div>
+            
+            <div class="input-group">
+                <label for="key">Key:</label>
+                <input type="text" id="key" placeholder="Enter encryption key" value="LEMON">
+                <div class="hint">Only letters A-Z are allowed (automatically converted to uppercase)</div>
+            </div>
+            
+            <button id="process-btn">Process</button>
+        </div>
+        
+        <div class="visualization">
+            <div class="vigenere-table-container">
+                <div class="vigenere-table-title">Vigenère Table:</div>
+                <table class="vigenere-table" id="vigenere-table"></table>
+            </div>
+            
+            <div class="key-expansion-container">
+                <div class="key-expansion-title">Key Expansion:</div>
+                <div class="key-expansion" id="key-expansion"></div>
+            </div>
+            
+            <div class="animation-container" id="animation-container">
+                <div class="animation-title">Visual Process:</div>
+                <div class="animation-controls">
+                    <button id="prev-step">Previous Letter</button>
+                    <button id="next-step">Next Letter</button>
+                </div>
+                <div id="animation-steps"></div>
+            </div>
+            
+            <div class="result-container">
+                <div class="result-title">
+                    <span id="result-label">Encrypted</span> Result:
+                </div>
+                <div class="result" id="result"></div>
+            </div>
+        </div>
+        
+        <div class="how-it-works">
+            <h2>How Vigenère Cipher Works:</h2>
+            <p>The Vigenère cipher is a method of encrypting alphabetic text by using a simple form of polyalphabetic substitution. It uses a keyword to determine which Caesar cipher to use for each letter of the plaintext.</p>
+            
+            <ol>
+                <li><strong>Choose a keyword</strong> - This will determine the shifting pattern.</li>
+                <li><strong>Repeat the keyword</strong> - Extend it to match the length of the plaintext.</li>
+                <li><strong>For each letter in the plaintext:</strong>
+                    <ul>
+                        <li>Find the corresponding letter in the extended keyword.</li>
+                        <li>Use the Vigenère table to find the intersection of the plaintext letter (row) and the keyword letter (column).</li>
+                        <li>The letter at the intersection is the ciphertext letter.</li>
+                    </ul>
+                </li>
+                <li><strong>For decryption:</strong> Find the keyword letter's row, locate the ciphertext letter in that row, and the column header is the plaintext letter.</li>
+            </ol>
+            
+            <p>The mathematical formula for encryption is:</p>
+            <div class="formula">C<sub>i</sub> = (P<sub>i</sub> + K<sub>i mod m</sub>) mod 26</div>
+            
+            <p>And for decryption:</p>
+            <div class="formula">P<sub>i</sub> = (C<sub>i</sub> - K<sub>i mod m</sub> + 26) mod 26</div>
+            
+            <p>Where:</p>
+            <ul>
+                <li>P<sub>i</sub> is the position of the plaintext letter (0-25)</li>
+                <li>C<sub>i</sub> is the position of the ciphertext letter (0-25)</li>
+                <li>K<sub>i mod m</sub> is the position of the keyword letter (0-25)</li>
+                <li>m is the length of the keyword</li>
+            </ul>
+            
+            <p>The Vigenère cipher is significantly more secure than simple substitution ciphers like the Caesar cipher because it uses multiple substitution alphabets, making frequency analysis more difficult.</p>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const inputText = document.getElementById('input-text');
+        const keyInput = document.getElementById('key');
+        const processBtn = document.getElementById('process-btn');
+        const vigenereTableEl = document.getElementById('vigenere-table');
+        const keyExpansionEl = document.getElementById('key-expansion');
+        const animationStepsEl = document.getElementById('animation-steps');
+        const resultEl = document.getElementById('result');
+        const tabs = document.querySelectorAll('.tab');
+        const inputLabel = document.getElementById('input-label');
+        const resultLabel = document.getElementById('result-label');
+        const prevStepBtn = document.getElementById('prev-step');
+        const nextStepBtn = document.getElementById('next-step');
+        
+        // State
+        let mode = 'encrypt';
+        let currentAnimationStep = 0;
+        let totalAnimationSteps = 0;
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            createVigenereTable();
+            processVigenere();
+        });
+        
+        // Event Listeners
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                tabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                mode = tab.dataset.tab;
+                
+                if (mode === 'encrypt') {
+                    inputLabel.textContent = 'Plaintext';
+                    resultLabel.textContent = 'Encrypted';
+                    inputText.placeholder = 'Enter text to encrypt';
+                } else {
+                    inputLabel.textContent = 'Ciphertext';
+                    resultLabel.textContent = 'Decrypted';
+                    inputText.placeholder = 'Enter text to decrypt';
+                }
+                
+                processVigenere();
+            });
+        });
+        
+        processBtn.addEventListener('click', processVigenere);
+        
+        inputText.addEventListener('input', e => {
+            e.target.value = e.target.value.toUpperCase().replace(/[^A-Z]/g, '');
+        });
+        
+        keyInput.addEventListener('input', e => {
+            e.target.value = e.target.value.toUpperCase().replace(/[^A-Z]/g, '');
+        });
+        
+        prevStepBtn.addEventListener('click', () => {
+            if (currentAnimationStep > 0) {
+                showAnimationStep(--currentAnimationStep);
+            }
+        });
+        
+        nextStepBtn.addEventListener('click', () => {
+            if (currentAnimationStep < totalAnimationSteps - 1) {
+                showAnimationStep(++currentAnimationStep);
+            }
+        });
+        
+        // Vigenère Cipher Functions
+        function processVigenere() {
+            const text = inputText.value.toUpperCase().replace(/[^A-Z]/g, '');
+            const key = keyInput.value.toUpperCase().replace(/[^A-Z]/g, '');
+            
+            if (!text || !key) return;
+            
+            // Expand the key to match the length of the text
+            const expandedKey = expandKey(key, text.length);
+            displayKeyExpansion(text, expandedKey);
+            
+            // Process each letter
+            let result = '';
+            const steps = [];
+            
+            for (let i = 0; i < text.length; i++) {
+                const textChar = text[i];
+                const keyChar = expandedKey[i];
+                
+                const textPos = textChar.charCodeAt(0) - 65; // A=0, B=1, ..., Z=25
+                const keyPos = keyChar.charCodeAt(0) - 65;
+                
+                let resultPos;
+                if (mode === 'encrypt') {
+                    resultPos = (textPos + keyPos) % 26;
+                } else {
+                    resultPos = (textPos - keyPos + 26) % 26; // +26 to handle negative numbers
+                }
+                
+                const resultChar = String.fromCharCode(resultPos + 65);
+                result += resultChar;
+                
+                steps.push({
+                    textChar,
+                    keyChar,
+                    resultChar,
+                    textPos,
+                    keyPos,
+                    resultPos,
+                    formula: mode === 'encrypt' 
+                        ? `(${textPos} + ${keyPos}) % 26 = ${resultPos}`
+                        : `(${textPos} - ${keyPos} + 26) % 26 = ${resultPos}`
+                });
+            }
+            
+            displayResult(result);
+            createAnimation(steps);
+            
+            // Reset animation
+            currentAnimationStep = 0;
+            totalAnimationSteps = steps.length;
+            showAnimationStep(currentAnimationStep);
+        }
+        
+        function expandKey(key, length) {
+            let expandedKey = '';
+            for (let i = 0; i < length; i++) {
+                expandedKey += key[i % key.length];
+            }
+            return expandedKey;
+        }
+        
+        function createVigenereTable() {
+            vigenereTableEl.innerHTML = '';
+            
+            // Create header row
+            const headerRow = document.createElement('tr');
+            headerRow.appendChild(document.createElement('th')); // Empty corner cell
+            
+            for (let i = 0; i < 26; i++) {
+                const th = document.createElement('th');
+                th.textContent = String.fromCharCode(65 + i);
+                headerRow.appendChild(th);
+            }
+            
+            vigenereTableEl.appendChild(headerRow);
+            
+            // Create data rows
+            for (let row = 0; row < 26; row++) {
+                const tr = document.createElement('tr');
+                
+                // Row header
+                const th = document.createElement('th');
+                th.textContent = String.fromCharCode(65 + row);
+                tr.appendChild(th);
+                
+                // Row data
+                for (let col = 0; col < 26; col++) {
+                    const td = document.createElement('td');
+                    td.textContent = String.fromCharCode(65 + (row + col) % 26);
+                    td.dataset.row = row;
+                    td.dataset.col = col;
+                    tr.appendChild(td);
+                }
+                
+                vigenereTableEl.appendChild(tr);
+            }
+        }
+        
+        // Display Functions
+        function displayKeyExpansion(text, expandedKey) {
+            keyExpansionEl.innerHTML = '';
+            
+            // Display text above
+            for (let i = 0; i < text.length; i++) {
+                const letter = document.createElement('div');
+                letter.className = 'key-letter';
+                letter.style.backgroundColor = '#f8f9fa';
+                letter.textContent = text[i];
+                keyExpansionEl.appendChild(letter);
+            }
+            
+            // Add a line break
+            const lineBreak = document.createElement('div');
+            lineBreak.style.flexBasis = '100%';
+            lineBreak.style.height = '10px';
+            keyExpansionEl.appendChild(lineBreak);
+            
+            // Display expanded key below
+            for (let i = 0; i < expandedKey.length; i++) {
+                const letter = document.createElement('div');
+                letter.className = 'key-letter';
+                letter.textContent = expandedKey[i];
+                keyExpansionEl.appendChild(letter);
+            }
+        }
+        
+        function displayResult(output) {
+            resultEl.textContent = output;
+        }
+        
+        function createAnimation(steps) {
+            animationStepsEl.innerHTML = '';
+            
+            steps.forEach((step, index) => {
+                const stepEl = document.createElement('div');
+                stepEl.className = 'animation-step';
+                
+                const title = document.createElement('div');
+                title.style.fontWeight = 'bold';
+                title.style.marginBottom = '20px';
+                title.textContent = `Processing Letter ${index + 1}: "${step.textChar}" with key "${step.keyChar}"`;
+                
+                const text = document.createElement('div');
+                text.className = 'animation-text';
+                
+                if (mode === 'encrypt') {
+                    text.innerHTML = `
+                        <p>Find the row for plaintext letter "${step.textChar}" (position ${step.textPos})</p>
+                        <p>Find the column for key letter "${step.keyChar}" (position ${step.keyPos})</p>
+                        <p>The intersection gives us the ciphertext letter "${step.resultChar}" (position ${step.resultPos})</p>
+                    `;
+                } else {
+                    text.innerHTML = `
+                        <p>Find the row for key letter "${step.keyChar}" (position ${step.keyPos})</p>
+                        <p>Find the ciphertext letter "${step.textChar}" in that row</p>
+                        <p>The column header gives us the plaintext letter "${step.resultChar}" (position ${step.resultPos})</p>
+                    `;
+                }
+                
+                const formula = document.createElement('div');
+                formula.className = 'animation-formula';
+                formula.textContent = step.formula;
+                
+                const letters = document.createElement('div');
+                letters.className = 'animation-letters';
+                
+                const textLetter = document.createElement('div');
+                textLetter.className = 'animation-letter';
+                textLetter.textContent = step.textChar;
+                
+                const keyLetter = document.createElement('div');
+                keyLetter.className = 'animation-letter';
+                keyLetter.textContent = step.keyChar;
+                keyLetter.style.backgroundColor = '#e9f7fe';
+                
+                const arrow = document.createElement('div');
+                arrow.style.fontSize = '24px';
+                arrow.textContent = '→';
+                
+                const resultLetter = document.createElement('div');
+                resultLetter.className = 'animation-letter highlight';
+                resultLetter.textContent = step.resultChar;
+                
+                letters.appendChild(textLetter);
+                letters.appendChild(keyLetter);
+                letters.appendChild(arrow);
+                letters.appendChild(resultLetter);
+                
+                stepEl.appendChild(title);
+                stepEl.appendChild(text);
+                stepEl.appendChild(formula);
+                stepEl.appendChild(letters);
+                
+                animationStepsEl.appendChild(stepEl);
+            });
+        }
+        
+        function showAnimationStep(step) {
+            const steps = document.querySelectorAll('.animation-step');
+            
+            steps.forEach((s, i) => {
+                if (i === step) {
+                    s.classList.add('active');
+                } else {
+                    s.classList.remove('active');
+                }
+            });
+            
+            // Update button states
+            prevStepBtn.disabled = step === 0;
+            nextStepBtn.disabled = step === totalAnimationSteps - 1;
+            
+            // Highlight the corresponding cell in the Vigenère table
+            highlightVigenereCell(step);
+        }
+        
+        function highlightVigenereCell(stepIndex) {
+            // Clear previous highlights
+            document.querySelectorAll('.vigenere-table td').forEach(cell => {
+                cell.classList.remove('highlight');
+            });
+            
+            if (stepIndex >= 0 && stepIndex < totalAnimationSteps) {
+                const step = document.querySelectorAll('.animation-step')[stepIndex];
+                if (!step) return;
+                
+                const title = step.querySelector('div[style*="font-weight: bold"]');
+                if (!title) return;
+                
+                const match = title.textContent.match(/Processing Letter \d+: "([A-Z])" with key "([A-Z])"/);
+                if (!match) return;
+                
+                const textChar = match[1];
+                const keyChar = match[2];
+                
+                const textPos = textChar.charCodeAt(0) - 65;
+                const keyPos = keyChar.charCodeAt(0) - 65;
+                
+                if (mode === 'encrypt') {
+                    // Highlight the cell at the intersection of textChar row and keyChar column
+                    const cell = document.querySelector(`.vigenere-table td[data-row="${textPos}"][data-col="${keyPos}"]`);
+                    if (cell) {
+                        cell.classList.add('highlight');
+                    }
+                } else {
+                    // For decryption, we need to find the cell in the keyChar row that contains the textChar
+                    const cells = document.querySelectorAll(`.vigenere-table td[data-row="${keyPos}"]`);
+                    cells.forEach(cell => {
+                        if (cell.textContent === textChar) {
+                            cell.classList.add('highlight');
+                        }
+                    });
+                }
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SHA-1 Hash Visualization</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            padding: 20px;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+        }
+        
+        .header {
+            display: flex;
+            align-0,0,0.1);
+            padding: 30px;
+        }
+        
+        .header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        
+        .back-btn {
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 8px 15px;
+            margin-right: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        .back-btn:hover {
+            background-color: #e9ecef;
+        }
+        
+        .back-btn::before {
+            content: "←";
+            margin-right: 5px;
+        }
+        
+        h1 {
+            flex-grow: 1;
+            text-align: center;
+            color: #2c3e50;
+        }
+        
+        .input-section {
+            margin-bottom: 30px;
+        }
+        
+        .input-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            font-family: monospace;
+        }
+        
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        .hint {
+            font-size: 12px;
+            color: #777;
+            margin-top: 5px;
+        }
+        
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background-color: #2980b9;
+        }
+        
+        .visualization {
+            margin-top: 30px;
+        }
+        
+        .sha1-overview {
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+        
+        .sha1-overview h2 {
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+        
+        .sha1-diagram {
+            max-width: 100%;
+            margin: 20px auto;
+            display: block;
+        }
+        
+        .animation-container {
+            position: relative;
+            height: 400px;
+            margin: 30px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            overflow: hidden;
+            background-color: #f8f9fa;
+        }
+        
+        .animation-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+        
+        .animation-controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .animation-step {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            opacity: 0;
+            transition: opacity 0.5s;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        
+        .animation-step.active {
+            opacity: 1;
+        }
+        
+        .animation-text {
+            font-size: 16px;
+            margin-top: 20px;
+            text-align: center;
+            max-width: 80%;
+        }
+        
+        .binary-block {
+            font-family: monospace;
+            background-color: #f0f0f0;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            text-align: center;
+            word-break: break-all;
+            max-width: 100%;
+            font-size: 14px;
+        }
+        
+        .result-container {
+            background-color: #f0f9ff;
+            padding: 20px;
+            border-radius: 5px;
+            border-left: 5px solid #3498db;
+        }
+        
+        .result-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+        
+        .result {
+            font-family: monospace;
+            font-size: 18px;
+            word-break: break-all;
+        }
+        
+        .how-it-works {
+            margin-top: 40px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+        
+        .how-it-works h2 {
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+        
+        .how-it-works p {
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+        
+        .how-it-works ol {
+            padding-left: 20px;
+            margin-bottom: 15px;
+        }
+        
+        .how-it-works li {
+            margin-bottom: 10px;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <button class="back-btn" onclick="window.location.href='index.html'">Back</button>
+            <h1>SHA-1 Hash Visualization</h1>
+        </div>
+        
+        <div class="input-section">
+            <div class="input-group">
+                <label for="input-text">Input Message:</label>
+                <textarea id="input-text" placeholder="Enter text to hash">Hello, world!</textarea>
+            </div>
+            
+            <button id="process-btn">Generate SHA-1 Hash</button>
+        </div>
+        
+        <div class="visualization">
+            <div class="sha1-overview">
+                <h2>SHA-1 Algorithm Overview</h2>
+                <img src="/placeholder.svg?height=300&width=600" alt="SHA-1 Algorithm Diagram" class="sha1-diagram">
+                <p>SHA-1 (Secure Hash Algorithm 1) is a cryptographic hash function that takes an input and produces a 160-bit (20-byte) hash value. It's commonly represented as a 40-digit hexadecimal number.</p>
+            </div>
+            
+            <div class="animation-container" id="animation-container">
+                <div class="animation-title">SHA-1 Process Visualization:</div>
+                <!-- <div class="animation-controls">
+                    <button id="prev-step">Previous Step</button>
+                    <button id="next-step">Next Step</button>
+                </div> -->
+                <div id="animation-steps"></div>
+            </div>
+            
+            <div class="result-container">
+                <div class="result-title">SHA-1 Hash:</div>
+                <div class="result" id="result"></div>
+            </div>
+        </div>
+        
+        <div class="how-it-works">
+            <h2>How SHA-1 Works:</h2>
+            <p>SHA-1 is a cryptographic hash function designed by the National Security Agency (NSA) and published by the NIST. While it is now considered cryptographically broken, it remains useful for understanding hash functions.</p>
+            
+            <ol>
+                <li><strong>Preprocessing:</strong>
+                    <ul>
+                        <li>Pad the message so its length is congruent to 448 modulo 512</li>
+                        <li>Append the original message length as a 64-bit big-endian integer</li>
+                        <li>The result is a message that is a multiple of 512 bits</li>
+                    </ul>
+                </li>
+                <li><strong>Initialize Hash Values:</strong>
+                    <ul>
+                        <li>h0 = 0x67452301</li>
+                        <li>h1 = 0xEFCDAB89</li>
+                        <li>h2 = 0x98BADCFE</li>
+                        <li>h3 = 0x10325476</li>
+                        <li>h4 = 0xC3D2E1F0</li>
+                    </ul>
+                </li>
+                <li><strong>Process Message in 512-bit Blocks:</strong>
+                    <ul>
+                        <li>Divide the message into 512-bit blocks</li>
+                        <li>For each block, break it into 16 32-bit words</li>
+                        <li>Extend the 16 words into 80 words using bitwise operations</li>
+                        <li>Initialize working variables with current hash values</li>
+                        <li>Perform 80 rounds of processing using different functions for each 20-round group</li>
+                        <li>Add the working variables to the current hash values</li>
+                    </ul>
+                </li>
+                <li><strong>Produce Final Hash:</strong>
+                    <ul>
+                        <li>Concatenate h0, h1, h2, h3, h4 to produce the final 160-bit hash value</li>
+                    </ul>
+                </li>
+            </ol>
+            
+            <p>SHA-1 has been deprecated for security applications due to theoretical attacks that could find collisions. Modern applications should use SHA-256 or other more secure hash functions.</p>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const inputText = document.getElementById('input-text');
+        const processBtn = document.getElementById('process-btn');
+        const animationStepsEl = document.getElementById('animation-steps');
+        const resultEl = document.getElementById('result');
+        const prevStepBtn = document.getElementById('prev-step');
+        const nextStepBtn = document.getElementById('next-step');
+        
+        // State
+        let currentAnimationStep = 0;
+        let totalAnimationSteps = 0;
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            processSHA1();
+        });
+        
+        // Event Listeners
+        processBtn.addEventListener('click', processSHA1);
+        
+        prevStepBtn.addEventListener('click', () => {
+            if (currentAnimationStep > 0) {
+                showAnimationStep(--currentAnimationStep);
+            }
+        });
+        
+        nextStepBtn.addEventListener('click', () => {
+            if (currentAnimationStep < totalAnimationSteps - 1) {
+                showAnimationStep(++currentAnimationStep);
+            }
+        });
+        
+        // SHA-1 Functions (Simplified for visualization)
+        function processSHA1() {
+            const message = inputText.value;
+            
+            // Compute SHA-1 hash
+            const hash = sha1(message);
+            
+            // Display result
+            resultEl.textContent = hash;
+            
+            // Create animation steps
+            const steps = [];
+            
+            steps.push({
+                type: 'input',
+                description: 'Input Message',
+                content: `
+                    <p>The input message is:</p>
+                    <div class="binary-block">"${message}"</div>
+                    <p>This message will be processed to produce a 160-bit hash value.</p>
+                `
+            });
+            
+            steps.push({
+                type: 'preprocessing',
+                description: 'Preprocessing',
+                content: `
+                    <p>The message is preprocessed by:</p>
+                    <ol>
+                        <li>Converting to binary</li>
+                        <li>Padding to make the length congruent to 448 modulo 512</li>
+                        <li>Appending the original message length as a 64-bit integer</li>
+                    </ol>
+                    <p>This ensures the message is a multiple of 512 bits.</p>
+                `
+            });
+            
+            steps.push({
+                type: 'initialization',
+                description: 'Initialize Hash Values',
+                content: `
+                    <p>The hash values are initialized to constants:</p>
+                    <div class="binary-block">
+                        h0 = 0x67452301<br>
+                        h1 = 0xEFCDAB89<br>
+                        h2 = 0x98BADCFE<br>
+                        h3 = 0x10325476<br>
+                        h4 = 0xC3D2E1F0
+                    </div>
+                `
+            });
+            
+            steps.push({
+                type: 'processing',
+                description: 'Process Message Blocks',
+                content: `
+                    <p>The message is processed in 512-bit blocks:</p>
+                    <ol>
+                        <li>Each block is divided into 16 32-bit words</li>
+                        <li>These words are extended to 80 words</li>
+                        <li>80 rounds of processing are performed</li>
+                        <li>The hash values are updated after each block</li>
+                    </ol>
+                    <p>This is the core of the SHA-1 algorithm.</p>
+                `
+            });
+            
+            steps.push({
+                type: 'result',
+                description: 'Final Hash Value',
+                content: `
+                    <p>The final hash is produced by concatenating the hash values:</p>
+                    <div class="binary-block">${hash}</div>
+                    <p>This 160-bit (40 hexadecimal digit) value is the SHA-1 hash of the input message.</p>
+                `
+            });
+            
+            createAnimation(steps);
+            
+            // Reset animation
+            currentAnimationStep = 0;
+            totalAnimationSteps = steps.length;
+            showAnimationStep(currentAnimationStep);
+        }
+        
+        // SHA-1 implementation
+        function sha1(msg) {
+            function rotateLeft(n, s) {
+                return ((n << s) | (n >>> (32 - s))) >>> 0;
+            }
+            
+            function toHexString(n) {
+                return ('00000000' + n.toString(16)).slice(-8);
+            }
+            
+            // Convert string to binary array
+            const binarray = [];
+            const mask = (1 << 8) - 1;
+            for (let i = 0; i < msg.length * 8; i += 8) {
+                binarray[i >> 5] |= (msg.charCodeAt(i / 8) & mask) << (24 - i % 32);
+            }
+            
+            // Add padding
+            const len = msg.length * 8;
+            binarray[len >> 5] |= 0x80 << (24 - len % 32);
+            binarray[(((len + 64) >> 9) << 4) + 15] = len;
+            
+            // Initialize hash values
+            const h = [0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476, 0xC3D2E1F0];
+            
+            // Process message in 16-word blocks
+            for (let i = 0; i < binarray.length; i += 16) {
+                const w = Array(80);
+                
+                // Copy block into first 16 words of w
+                for (let j = 0; j < 16; j++) {
+                    w[j] = binarray[i + j] || 0;
+                }
+                
+                // Extend 16 words to 80 words
+                for (let j = 16; j < 80; j++) {
+                    w[j] = rotateLeft(w[j-3] ^ w[j-8] ^ w[j-14] ^ w[j-16], 1);
+                }
+                
+                // Initialize working variables
+                let [a, b, c, d, e] = h;
+                
+                // Main loop
+                for (let j = 0; j < 80; j++) {
+                    let f, k;
+                    
+                    if (j < 20) {
+                        f = (b & c) | ((~b) & d);
+                        k = 0x5A827999;
+                    } else if (j < 40) {
+                        f = b ^ c ^ d;
+                        k = 0x6ED9EBA1;
+                    } else if (j < 60) {
+                        f = (b & c) | (b & d) | (c & d);
+                        k = 0x8F1BBCDC;
+                    } else {
+                        f = b ^ c ^ d;
+                        k = 0xCA62C1D6;
+                    }
+                    
+                    const temp = (rotateLeft(a, 5) + f + e + k + w[j]) >>> 0;
+                    e = d;
+                    d = c;
+                    c = rotateLeft(b, 30);
+                    b = a;
+                    a = temp;
+                }
+                
+                // Add working variables to hash
+                h[0] = (h[0] + a) >>> 0;
+                h[1] = (h[1] + b) >>> 0;
+                h[2] = (h[2] + c) >>> 0;
+                h[3] = (h[3] + d) >>> 0;
+                h[4] = (h[4] + e) >>> 0;
+            }
+            
+            // Produce final hash value as a hex string
+            return h.map(toHexString).join('');
+        }
+        
+        // Display Functions
+        function createAnimation(steps) {
+            animationStepsEl.innerHTML = '';
+            
+            steps.forEach((step, index) => {
+                const stepEl = document.createElement('div');
+                stepEl.className = 'animation-step';
+                
+                const title = document.createElement('div');
+                title.style.fontWeight = 'bold';
+                title.style.marginBottom = '20px';
+                title.style.fontSize = '18px';
+                title.textContent = step.description;
+                
+                const content = document.createElement('div');
+                content.innerHTML = step.content;
+                
+                stepEl.appendChild(title);
+                stepEl.appendChild(content);
+                
+                animationStepsEl.appendChild(stepEl);
+            });
+        }
+        
+        function showAnimationStep(step) {
+            const steps = document.querySelectorAll('.animation-step');
+            
+            steps.forEach((s, i) => {
+                if (i === step) {
+                    s.classList.add('active');
+                } else {
+                    s.classList.remove('active');
+                }
+            });
+            
+            // Update button states
+            prevStepBtn.disabled = step === 0;
+            nextStepBtn.disabled = step === totalAnimationSteps - 1;
+        }
+    </script>
+</body>
+</html>
