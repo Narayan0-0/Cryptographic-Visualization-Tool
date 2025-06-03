@@ -87,8 +87,3 @@ Welcome to the **Cryptography Visualization Tool** — an interactive web platfo
 
 Built with love (and a little chaos) by **NARAYAN** and **MANAS**.
 
----
-
-## 📃 License
-
-This project is open source and available under the [MIT License](LICENSE).
